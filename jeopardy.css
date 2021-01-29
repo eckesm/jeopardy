@@ -1,0 +1,27 @@
+/* some colors you may find useful:
+  #115ff4
+  #060ce9
+  #28a200
+  #8d2ab5
+  #74119c
+*/
+
+table {
+	border: 3px solid black;
+}
+thead {
+	background-color: #060ce9;
+}
+tbody {
+	background-color: #115ff4;
+}
+
+div {
+	width: 100px;
+	height: 100px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	word-wrap: normal;
+}
