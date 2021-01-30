@@ -4,59 +4,16 @@
 
 const categories = 6;
 const cluesPerCat = 5;
-const jeopardyGame = [];
 
-// categories is the main data structure for the app; it looks like this:
+/********************************************************************
+ ----------------------- getCategoryIds() ---------------------------
+ ********************************************************************
 
-//  [
-//    { title: "Math",
-//      clues: [
-//        {question: "2+2", answer: 4, showing: null},
-//        {question: "1+1", answer: 2, showing: null}
-//        ...
-//      ],
-//    },
-//    { title: "Literature",
-//      clues: [
-//        {question: "Hamlet Author", answer: "Shakespeare", showing: null},
-//        {question: "Bell Jar Author", answer: "Plath", showing: null},
-//        ...
-//      ],
-//    },
-//    ...
-//  ]
-
-/* ******************************************************************
- * --------------------- buildLogicBoard() --------------------------
- * ******************************************************************
-
- * DESCRIPTION:
- * --> returns an array containing an array for each column (category) and an object for each row in the column.     */
-
-// function buildLogicBoard(categories, cluesPerCat) {
-// 	const logicBoard = [];
-// 	for (let category = 0; category < categories; category++) {
-// 		const categoryArr = [];
-// 		for (let clue = 0; clue < cluesPerCat; clue++) {
-// 			categoryArr.push({ category: category, clue: clue });
-// 		}
-// 		logicBoard.push(categoryArr);
-// 	}
-
-// 	// console.log('logicBoard',logicBoard)
-// 	return logicBoard;
-// }
-
-// buildLogicBoard(categories,cluesPerCat)
-
-/* ******************************************************************
- * --------------------- getCategoryIds() ---------------------------
- * ******************************************************************
-
- * DESCRIPTION:
- * --> gets 1000 categories from API
- * --> removes categories with fewer clues per category than required (cluesPerCat)
- * --> Returns array containing the correct number (categories) of random category ids     */
+DESCRIPTION:
+ --> gets 1000 categories from API
+ --> removes categories with fewer clues per category than required (cluesPerCat)
+ --> Returns array containing the correct number (categories) of random category ids
+ */
 
 async function getCategoryIds(numCategories, minClues) {
 	const categoriesArr = [];
@@ -72,12 +29,13 @@ async function getCategoryIds(numCategories, minClues) {
 	return _.sampleSize(categoriesArr, numCategories);
 }
 
-/* ******************************************************************
- * --------------------- getCategory() ---------------------------
- * ******************************************************************
+/********************************************************************
+ ------------------------- getCategory() ----------------------------
+ ********************************************************************
 
- * DESCRIPTION:
- * --> returns an object with a category title and clue information based on a category ID     */
+ DESCRIPTION:
+ --> returns an object with a category title and clue information based on a category ID
+ */
 
 async function getCategory(catId) {
 	const res = await axios.get('https://jservice.io/api/category', { params: { id: catId } });
@@ -92,22 +50,23 @@ async function getCategory(catId) {
 	return catObj;
 }
 
-/* ******************************************************************
- * ------------------------ fillTable() -----------------------------
- * ******************************************************************
+/********************************************************************
+ -------------------------- fillTable() -----------------------------
+ ********************************************************************
 
- * DESCRIPTION:
- * --> catIdsArr: create array of category IDs based on passing the number of categories and number of clues per category to the getCategoryIds function
- * --> catObjsArr: for every id in catIdsArr, passes id integer to getCategory() and receives an object with category information; contains an array of objects containing category information
- * --> creates table elements in DOM based on number of categories, clues per category, and category titles received from API     */
+ DESCRIPTION:
+  --> catIdsArr: create array of category IDs based on passing the number of categories and number of clues per category to the getCategoryIds function
+  --> catObjsArr: for every id in catIdsArr, passes id integer to getCategory() and receives an object with category information; contains an array of objects containing category information
+  --> creates table elements in DOM based on number of categories, clues per category, and category titles received from API
+  */
 
 async function fillTable(catNum, cluesPerCat) {
+	const jeopardyGame = [];
 	const catIdsArr = await getCategoryIds(catNum, cluesPerCat);
 
 	Promise.all(catIdsArr.map(getCategory)).then(catObjsArr => {
 		console.log(catObjsArr);
 		catObjsArr.forEach(obj => jeopardyGame.push(obj));
-		// console.log(jeopardyGame);
 
 		const jeopardyTable = document.createElement('table');
 		const catHeadRow = document.createElement('thead');
@@ -139,75 +98,91 @@ async function fillTable(catNum, cluesPerCat) {
 			tableBody.append(newTr);
 		}
 		jeopardyTable.append(tableBody);
-
 		document.body.prepend(jeopardyTable);
 
 		// add event listeners to all clue divs
 		$('.clue').on('click', handleClick);
 	});
+
+	// ________________________________________________________________
+
+	// handleClick moved into fillTable() so that jeopardyBoard variable does not have to be global
+	function handleClick(evt) {
+		// function syncBoardToJeopardyGame() {
+		// 	const completedSpaces = document.querySelectorAll('.complete');
+
+		// 	completedSpaces.forEach(space => {
+		// 		const categoryNum = space.getAttribute('data-category');
+		// 		const clueNum = space.getAttribute('data-clue');
+		// 		const jeopardyObj = jeopardyGame[categoryNum].clues[clueNum];
+		// 		jeopardyObj.showing = 'answer';
+		// 		// console.log(jeopardyObj)
+		// 	});
+		// }
+		// syncBoardToJeopardyGame();
+
+		const categoryNum = evt.target.getAttribute('data-category');
+		const clueNum = evt.target.getAttribute('data-clue');
+
+		let show = jeopardyGame[categoryNum].clues[clueNum].showing;
+		if (show === 'answer') return;
+
+		let question = jeopardyGame[categoryNum].clues[clueNum].question;
+
+		let answer = jeopardyGame[categoryNum].clues[clueNum].answer;
+		if (answer.search('<i>') > -1) {
+			answer = answer.substring(3, answer.length - 4);
+		}
+
+		// console.log(evt.target, show, question, answer);
+		evt.target.classList.add('active');
+		if (show === null) {
+			jeopardyGame[categoryNum].clues[clueNum].showing = 'clue';
+			evt.target.innerText = question;
+			showModal(question, answer, 'none');
+		}
+		else if (show === 'clue') {
+			jeopardyGame[categoryNum].clues[clueNum].showing = 'answer';
+			evt.target.innerText = answer;
+			showModal(question, answer, 'clue');
+		}
+	}
 }
 
 fillTable(categories, cluesPerCat);
 
-/** Handle clicking on a clue: show the question or answer.
- *
- * Uses .showing property on clue to determine what to show:
- * - if currently null, show question & set .showing to "question"
- * - if currently "question", show answer & set .showing to "answer"
- * - if currently "answer", ignore click
- * */
+/********************************************************************
+ -------------------------- showModal() -----------------------------
+ ********************************************************************
 
-function handleClick(evt) {
-	const categoryNum = evt.target.getAttribute('data-category');
-	const clueNum = evt.target.getAttribute('data-clue');
+ DESCRIPTION:
+  --> shows a modal when passed content text and a title
+  --> adds event listener to remove modal when user clicks outside of modal
+  --> adds event listener to show answer if modal is clicked when showing question
+  --> REFERENCE: https://www.w3schools.com/howto/howto_css_modals.asp
+  */
 
-	let show = jeopardyGame[categoryNum].clues[clueNum].showing;
-	let question = jeopardyGame[categoryNum].clues[clueNum].question;
+function showModal(question, answer, showing) {
+	let showTitle, showText;
+	showing === 'none' ? (showTitle = 'Question') : (showTitle = 'Answer');
+	showing === 'none' ? (showText = question) : (showText = answer);
 
-	let answer = jeopardyGame[categoryNum].clues[clueNum].answer;
-	if (answer.search('<i>') > -1) {
-		answer = answer.substring(3, answer.length - 4);
-	}
-
-	console.log(evt.target, show, question, answer);
-
-	if (show === null) {
-		jeopardyGame[categoryNum].clues[clueNum].showing = 'clue';
-		evt.target.innerText = question;
-		showModal(question, 'Clue');
-	}
-	else if (show === 'clue') {
-		jeopardyGame[categoryNum].clues[clueNum].showing = 'answer';
-		evt.target.innerText = answer;
-		showModal(answer, 'Answer');
-	}
-}
-
-function showModal(text, title) {
 	let modalText = `
-  <div id="jeopardyModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>${title}</h2>
+  <div id="jeopardyModalWindow" class="modal">
+    <div id="jeopardyModalContent" class="modal-content">
+      <div id="jeopardyModalHeader" class="modal-header">
+        <h2 id="jeopardyModalTitle">${showTitle}</h2>
       </div>
-      <div class="modal-body">
-        <p>${text}</p>
+      <div id="jeopardyModalBody" class="modal-body">
+        <p id="jeopardyModalText">${showText}</p>
       </div>
     </div>
   </div>
   `;
 	$(`${modalText}`).appendTo(document.body);
 
-	const newModal = document.querySelector('#jeopardyModal');
-
-	window.addEventListener('click', function(e) {
-		if (e.target == newModal) {
-			newModal.remove();
-		}
-	});
-
-	console.log(newModal);
-	newModal.style.display = 'block';
+	const newModalWindow = document.querySelector('#jeopardyModalWindow');
+	newModalWindow.style.display = 'block';
 }
 
 /** Wipe the current Jeopardy board, show the loading spinner,
@@ -240,3 +215,19 @@ async function setupAndStart() {}
 // .click(function(evt){
 //   console.log('clicked',evt.target)
 // })
+
+// add event listener to window
+window.addEventListener('click', function(e) {
+	const newModalWindow = document.querySelector('#jeopardyModalWindow');
+	const newModalBody = document.querySelector('#jeopardyModalBody');
+	const newModalHeader = document.querySelector('#jeopardyModalHeader');
+	const activeDiv = document.querySelector('.active');
+	if (e.target == newModalWindow || e.target == newModalBody || e.target == newModalHeader) {
+		if (activeDiv.classList.contains('started')) {
+			activeDiv.classList.add('complete');
+		}
+		activeDiv.classList.remove('active');
+		activeDiv.classList.add('started');
+		newModalWindow.remove();
+	}
+});
