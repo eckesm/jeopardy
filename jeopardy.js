@@ -4,6 +4,7 @@
 
 const categories = 6;
 const cluesPerCat = 5;
+const jeopardyGame = [];
 
 // categories is the main data structure for the app; it looks like this:
 
@@ -59,8 +60,7 @@ const cluesPerCat = 5;
 
 async function getCategoryIds(numCategories, minClues) {
 	const categoriesArr = [];
-	for (let offset = 0; offset < 1; offset++) {
-		// <----- UPDATE
+	for (let offset = 0; offset < 10; offset++) {
 		const res = await axios.get('https://jservice.io/api/categories', {
 			params : { count: 100, offset: `${offset * 100}` }
 		});
@@ -106,6 +106,8 @@ async function fillTable(catNum, cluesPerCat) {
 
 	Promise.all(catIdsArr.map(getCategory)).then(catObjsArr => {
 		console.log(catObjsArr);
+		catObjsArr.forEach(obj => jeopardyGame.push(obj));
+		// console.log(jeopardyGame);
 
 		const jeopardyTable = document.createElement('table');
 		const catHeadRow = document.createElement('thead');
@@ -139,6 +141,9 @@ async function fillTable(catNum, cluesPerCat) {
 		jeopardyTable.append(tableBody);
 
 		document.body.prepend(jeopardyTable);
+
+		// add event listeners to all clue divs
+		$('.clue').on('click', handleClick);
 	});
 }
 
@@ -152,7 +157,58 @@ fillTable(categories, cluesPerCat);
  * - if currently "answer", ignore click
  * */
 
-function handleClick(evt) {}
+function handleClick(evt) {
+	const categoryNum = evt.target.getAttribute('data-category');
+	const clueNum = evt.target.getAttribute('data-clue');
+
+	let show = jeopardyGame[categoryNum].clues[clueNum].showing;
+	let question = jeopardyGame[categoryNum].clues[clueNum].question;
+
+	let answer = jeopardyGame[categoryNum].clues[clueNum].answer;
+	if (answer.search('<i>') > -1) {
+		answer = answer.substring(3, answer.length - 4);
+	}
+
+	console.log(evt.target, show, question, answer);
+
+	if (show === null) {
+		jeopardyGame[categoryNum].clues[clueNum].showing = 'clue';
+		evt.target.innerText = question;
+		showModal(question, 'Clue');
+	}
+	else if (show === 'clue') {
+		jeopardyGame[categoryNum].clues[clueNum].showing = 'answer';
+		evt.target.innerText = answer;
+		showModal(answer, 'Answer');
+	}
+}
+
+function showModal(text, title) {
+	let modalText = `
+  <div id="jeopardyModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>${title}</h2>
+      </div>
+      <div class="modal-body">
+        <p>${text}</p>
+      </div>
+    </div>
+  </div>
+  `;
+	$(`${modalText}`).appendTo(document.body);
+
+	const newModal = document.querySelector('#jeopardyModal');
+
+	window.addEventListener('click', function(e) {
+		if (e.target == newModal) {
+			newModal.remove();
+		}
+	});
+
+	console.log(newModal);
+	newModal.style.display = 'block';
+}
 
 /** Wipe the current Jeopardy board, show the loading spinner,
  * and update the button used to fetch data.
@@ -180,3 +236,7 @@ async function setupAndStart() {}
 /** On page load, add event handler for clicking clues */
 
 // TODO
+
+// .click(function(evt){
+//   console.log('clicked',evt.target)
+// })
