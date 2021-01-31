@@ -1,9 +1,31 @@
-/* ******************************************************************
----------------------------- Settings -------------------------------
+/********************************************************************
+------------------- Settings & Table of Contents --------------------
 ****************************************************************** */
 
 const categories = 6;
 const cluesPerCat = 5;
+
+/*___________________________________________________________________
+
+TABLE OF CONTENTS
+ (1) getCategoryIds()
+ (2) getCategory()
+ (3) fillTable()
+ (4) showModal()
+   4-a) handleClick()
+ (5) setupAndStart()
+ (6) showLoadingView()
+ (7) hideLoadingView()
+ (8) Window Event Listener
+ (9) Auxillary Functions
+   9-a) properFontSize()
+   9-b) showModal()
+ (10) When DOM Loads
+   10-a) Window Event Listener
+   10-b) Create Start/Restart Button
+   10-c) Create Game Logo
+*/
+
 
 /********************************************************************
  ----------------------- getCategoryIds() ---------------------------
@@ -12,8 +34,7 @@ const cluesPerCat = 5;
 DESCRIPTION:
  --> gets 1000 categories from API
  --> removes categories with fewer clues per category than required (cluesPerCat)
- --> Returns array containing the correct number (categories) of random category ids
- */
+ --> Returns array containing the correct number (categories) of random category ids */
 
 async function getCategoryIds(numCategories, minClues) {
 	const categoriesArr = [];
@@ -34,16 +55,17 @@ async function getCategoryIds(numCategories, minClues) {
  ********************************************************************
 
  DESCRIPTION:
- --> returns an object with a category title and clue information based on a category ID
- */
+ --> returns an object with a category title and clue information based on a category ID */
 
 async function getCategory(catId) {
 	const res = await axios.get('https://jservice.io/api/category', { params: { id: catId } });
 
+  //creates array of clue objects
 	const cluesArr = res.data.clues.map(clue => {
 		return { question: clue.question, answer: clue.answer, showing: null, value: clue.value };
 	});
 
+  // creates category object containing the category title and an array of all clues
 	const catObj = {};
 	catObj.title = res.data.title;
 	catObj.clues = cluesArr;
@@ -57,21 +79,33 @@ async function getCategory(catId) {
  DESCRIPTION:
   --> catIdsArr: create array of category IDs based on passing the number of categories and number of clues per category to the getCategoryIds function
   --> catObjsArr: for every id in catIdsArr, passes id integer to getCategory() and receives an object with category information; contains an array of objects containing category information
-  --> creates table elements in DOM based on number of categories, clues per category, and category titles received from API
-  */
+  --> creates table elements in DOM based on number of categories, clues per category, and category titles received from API */
 
 async function fillTable(catNum, cluesPerCat) {
 	const jeopardyGame = [];
 	const catIdsArr = await getCategoryIds(catNum, cluesPerCat);
 
+  // get array of category objects
 	Promise.all(catIdsArr.map(getCategory)).then(catObjsArr => {
-		console.log(catObjsArr);
-		catObjsArr.forEach(obj => jeopardyGame.push(obj));
+    
+    // transfer each object to the jeopardy game
+    catObjsArr.forEach(obj =>{
 
+      // if the category contains more clues than requred, take a sampling of the clues to include in the game board
+      if (obj.clues.length>cluesPerCat){
+        const sampleOfClues=_.sampleSize(obj.clues,cluesPerCat)
+        obj.clues=sampleOfClues
+      }
+      // push category object to the jeopardy game variable
+      jeopardyGame.push(obj)
+    } );
+
+    // crerate game board
 		const jeopardyTable = document.createElement('table');
 		jeopardyTable.setAttribute('id', 'jeopardytable');
 		const catHeadRow = document.createElement('thead');
 
+    // create table head and data cells and add category titles; append to jeopardy table
 		for (let category = 0; category < catNum; category++) {
 			const newTd = document.createElement('td');
 			const newDiv = document.createElement('div');
@@ -81,11 +115,12 @@ async function fillTable(catNum, cluesPerCat) {
 			newDiv.innerText = catObjsArr[category].title;
 			newTd.append(newDiv);
 			catHeadRow.append(newTd);
-		}
+    }
 		jeopardyTable.append(catHeadRow);
 
+    // create table body, rows, and spaces named with data attributes denoting each space's category and row; append all to jeopardy table; append table to document body
 		const tableBody = document.createElement('tbody');
-		for (let clue = 0; clue < cluesPerCat; clue++) {
+    for (let clue = 0; clue < cluesPerCat; clue++) {
 			const newTr = document.createElement('tr');
 			for (let category = 0; category < catNum; category++) {
 				const newTd = document.createElement('td');
@@ -111,9 +146,12 @@ async function fillTable(catNum, cluesPerCat) {
 		$('.clue').on('click', handleClick);
 	});
 
-	// ________________________________________________________________
+  //_________________________________________________________________
+  
+  /* -----> HandleClick() <-----
+  DESCRIPTION:
+   --> handleClick moved into fillTable() so that jeopardyBoard variable does not have to be global */
 
-	// handleClick moved into fillTable() so that jeopardyBoard variable does not have to be global
 	function handleClick(evt) {
 		let clickedClue = evt.target;
 		if (evt.target.classList.contains('clueImg')) clickedClue = clickedClue.parentElement;
@@ -150,46 +188,13 @@ async function fillTable(catNum, cluesPerCat) {
 }
 
 /********************************************************************
- -------------------------- showModal() -----------------------------
- ********************************************************************
-
- DESCRIPTION:
-  --> shows a modal when passed content text, a title, and the showing state of the object
-  --> REFERENCE: https://www.w3schools.com/howto/howto_css_modals.asp
-  */
-
-function showModal(question, answer, showing) {
-	let showTitle, showText;
-	showing === 'none' ? (showTitle = 'Question') : (showTitle = 'Answer');
-	showing === 'none' ? (showText = question) : (showText = answer);
-
-	let modalText = `
-  <div id="jeopardyModalWindow" class="modal">
-    <div id="jeopardyModalContent" class="modal-content ${showTitle.toLowerCase()}">
-      <div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
-        <h2 id="jeopardyModalTitle">${showTitle}</h2>
-      </div>
-      <div id="jeopardyModalBody" class="modal-body">
-        <p id="jeopardyModalText" class="modal-text">${showText}</p>
-      </div>
-    </div>
-  </div>
-  `;
-	$(`${modalText}`).appendTo(document.body);
-
-	const newModalWindow = document.querySelector('#jeopardyModalWindow');
-	newModalWindow.style.display = 'block';
-}
-
-/********************************************************************
  -------------------------- setupAndStart() -------------------------
  ********************************************************************
 
  DESCRIPTION:
   --> shows the loading view and hides the start/restart
   --> runs fillTable() which runs the APIs and builds the game board in the DOM
-  --> the loading view is hidden in the fillTable() function immediately after the game board is loaded into the DOM
-  */
+  --> the loading view is hidden in the fillTable() function immediately after the game board is loaded into the DOM */
 
 async function setupAndStart() {
 	showLoadingView();
@@ -203,8 +208,7 @@ async function setupAndStart() {
  DESCRIPTION:
   --> removes any existing game board from the DOM
   --> hides the start/restart button
-  --> creates and dislays the loading view
-  */
+  --> creates and dislays the loading view */
 
 function showLoadingView() {
 	document.querySelector('#startrestartbutton').style.visibility = 'hidden';
@@ -229,8 +233,7 @@ function showLoadingView() {
  ********************************************************************
 
  DESCRIPTION:
-  --> removes the loading spinner and updates the start/restart button.
-  */
+  --> removes the loading spinner and updates the start/restart button. */
 
 function hideLoadingView() {
 	const loadingDiv = document.querySelector('div.loading');
@@ -244,14 +247,71 @@ function hideLoadingView() {
 }
 
 /********************************************************************
- --------------------- Window Event Listener ------------------------
- ********************************************************************
+ ----------------------- Auxillary Functions ------------------------
+ *******************************************************************/
 
+/* -----> properFontSize() <-----
+DESCRIPTION:
+ --> returns the font size that fits best in the the space given the character length of the string. */
+
+function properFontSize(string) {
+	if (string.length > 200) return '8px';
+	if (string.length > 150) return '10px';
+	if (string.length > 100) return '12px';
+	if (string.length > 90) return '13px';
+	if (string.length > 80) return '14px';
+	if (string.length > 70) return '15px';
+	if (string.length > 60) return '16px';
+	if (string.length > 50) return '18px';
+	if (string.length > 40) return '20px';
+	if (string.length > 30) return '22px';
+	if (string.length > 20) return '24px';
+	if (string.length > 10) return '27px';
+	return '30px';
+}
+
+// __________________________________________________________________
+
+/* -----> showModal() <-----
+
+DESCRIPTION:
+ --> shows a modal when passed content text, a title, and the showing state of the object
+ --> REFERENCE: https://www.w3schools.com/howto/howto_css_modals.asp */
+
+ function showModal(question, answer, showing) {
+	let showTitle, showText;
+	showing === 'none' ? (showTitle = 'Question') : (showTitle = 'Answer');
+	showing === 'none' ? (showText = question) : (showText = answer);
+
+	let modalText = `
+  <div id="jeopardyModalWindow" class="modal">
+    <div id="jeopardyModalContent" class="modal-content ${showTitle.toLowerCase()}">
+      <div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
+        <h2 id="jeopardyModalTitle">${showTitle}</h2>
+      </div>
+      <div id="jeopardyModalBody" class="modal-body">
+        <p id="jeopardyModalText" class="modal-text">${showText}</p>
+      </div>
+    </div>
+  </div>
+  `;
+	$(`${modalText}`).appendTo(document.body);
+
+	const newModalWindow = document.querySelector('#jeopardyModalWindow');
+	newModalWindow.style.display = 'block';
+}
+
+/********************************************************************
+ ------------------------- When DOM Loads ---------------------------
+ *******************************************************************/
+
+/* -----> Window Event Listener <-----
+ 
  DESCRIPTION:
   --> adds event listener to remove modal when user clicks outside of modal
-  --> adjusts classes to enable css formatting
-  */
-window.addEventListener('click', function(e) {
+  --> adjusts classes to enable css formatting */
+
+ window.addEventListener('click', function(e) {
 	const newModalWindow = document.querySelector('#jeopardyModalWindow');
 	const newModalBody = document.querySelector('#jeopardyModalBody');
 	const newModalHeader = document.querySelector('#jeopardyModalHeader');
@@ -269,48 +329,42 @@ window.addEventListener('click', function(e) {
 		e.target == newModalContent
 	) {
 		if (activeDiv.classList.contains('started')) {
-			activeDiv.classList.add('complete');
-		}
+      activeDiv.classList.add('complete');
+      activeDiv.classList.remove('started')
+    } else {
+      activeDiv.classList.add('started');
+    }
 		activeDiv.classList.remove('active');
-		activeDiv.classList.add('started');
 		newModalWindow.remove();
 	}
 });
 
-/********************************************************************
- ----------------------- Auxillary Functions ------------------------
- *******************************************************************/
+//___________________________________________________________________
 
-// returns the font size that fits best in the the space given the character length of the string.
-function properFontSize(string) {
-	if (string.length > 200) return '8px';
-	if (string.length > 150) return '10px';
-	if (string.length > 100) return '12px';
-	if (string.length > 90) return '13px';
-	if (string.length > 80) return '14px';
-	if (string.length > 70) return '15px';
-	if (string.length > 60) return '16px';
-	if (string.length > 50) return '18px';
-	if (string.length > 40) return '20px';
-	if (string.length > 30) return '22px';
-	if (string.length > 20) return '24px';
-	if (string.length > 10) return '27px';
-	return '30px';
+/* -----> Create Start/Restart Button <-----
+ 
+ DESCRIPTION:
+  --> creates the start button and adds it to the document body */
+function createStartREstartButton(){
+  const startRestartBtn = document.createElement('div');
+  startRestartBtn.setAttribute('id', 'startrestartbutton');
+  startRestartBtn.innerText = 'Start!';
+  startRestartBtn.classList.add('start');
+  startRestartBtn.addEventListener('click', setupAndStart);
+  return startRestartBtn
 }
+document.body.prepend(createStartREstartButton())
 
-/********************************************************************
- ------------------------- When DOM Loads----------------------------
- *******************************************************************/
+//___________________________________________________________________
 
-// CREATE BUTTON TO START GAME
-const startRestartBtn = document.createElement('div');
-startRestartBtn.setAttribute('id', 'startrestartbutton');
-startRestartBtn.innerText = 'Start Jeopardy!';
-startRestartBtn.classList.add('start');
-startRestartBtn.addEventListener('click', setupAndStart);
-document.body.prepend(startRestartBtn);
-
-const logoDiv = document.createElement('div');
-logoDiv.setAttribute('id', 'jeopardylogo');
-logoDiv.innerText = 'JEOPARDY!';
-document.body.prepend(logoDiv);
+/* -----> Create Game Logo <-----
+ 
+ DESCRIPTION:
+  --> creates the game logo and adds it to the document body */
+function createLogo(){
+  const logoDiv = document.createElement('div');
+  logoDiv.setAttribute('id', 'jeopardylogo');
+  logoDiv.innerText = 'JEOPARDY!';
+  return logoDiv
+}
+document.body.prepend(createLogo());

@@ -22,17 +22,17 @@ body {
 	border-top: 3px solid black;
 	background-color: rgba(0, 0, 0, .90);
 	position: fixed;
-  top: 0;
-  z-index: 1;
+	top: 0;
+	z-index: 1;
 }
 
 #startrestartbutton {
 	border-radius: 50%;
 	color: white;
 	font-family: Copse;
-	transition: border-color 250ms;
-  transition: background-color 250ms;
-  z-index: 2
+  transition-property: background-color,transform;
+  transition-duration: 500ms;
+	z-index: 2;
 }
 
 #startrestartbutton.start {
@@ -46,7 +46,7 @@ body {
 	margin-left: -100px;
 	top: 50%;
 	margin-top: -100px;
-	font-size: 35px;
+	font-size: 60px;
 }
 
 #startrestartbutton.restart {
@@ -62,6 +62,7 @@ body {
 
 #startrestartbutton:hover {
 	background-color: #060ce9;
+	transform: scale(1.1);
 }
 
 div.loading {
@@ -80,68 +81,70 @@ img.loading {
 }
 
 table {
-  margin-top: 125px;
-  margin-bottom: 25px;
+	margin-top: 125px;
+	margin-bottom: 25px;
 	margin-left: auto;
 	margin-right: auto;
-	border: 3px solid #060ce9;
+	border: 5px solid #060ce9;
 	font-family: Copse;
 }
 
 .category-head {
-  font-size: 20px;
-  background-color: #060ce9;
+	font-size: 20px;
+	background-color: #060ce9;
 	color: white;
+  font-weight: bold;
+  transition-duration: 500ms;
+  margin: 2px;
 }
 
-tbody {
-	background-color: #115ff4;
+.category-head:hover {
+  color: yellow;
 }
 
 div {
-  width: 125px;
-  height: 125px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  word-break: break-word;
-  font-family: Copse;
-  color: white;
+	width: 125px;
+	height: 125px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	word-break: break-word;
+	font-family: Copse;
+	color: white;
 }
 
 div.clue {
-  font-size:15px;
-  transition: all 500ms; 
+	background-color: #115ff4;
+	transition: all 500ms;
+	margin: 2px;
 }
 
-.active {
-  background-color: #8d2ab5;
-}
-.started {
-  background-color: #8d2ab5;
-  /* transform: rotatey(360deg) */
+div.started {
+	background-color: #8d2ab5;
 }
 
-.complete {
-  background-color: #28a200;
-  /* transform: rotatey(720deg) */
+div.complete {
+	background-color: #28a200;
 }
 
-div.clue:hover{
-  background-color:#1055d4 ;
+div.clue:hover {
+	background-color: #1055d4;
+	transform: scale(1.05);
+	margin: 1px;
 }
 
-div.started:hover{
-  background-color:#8315af ;
+div.started:hover {
+	background-color: #74119c;
 }
 
-div.complete:hover{
-  background-color:#218300 ;
+div.complete:hover {
+	background-color: #218300;
+	transform: scale(1);
 }
 
 .clue > img {
-  height: 40px;
+	height: 40px;
 }
 
 .modal {
@@ -195,5 +198,3 @@ div.complete:hover{
 .modal-text {
 	font-size: 30px;
 }
-
-
