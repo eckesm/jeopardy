@@ -2,81 +2,198 @@
   #115ff4
   #060ce9
   #28a200
+  #1c7000
   #8d2ab5
   #74119c
 */
 
+/* REFERENCE: https://cssgradient.io/ */
+body {
+	margin: 0px;
+}
+
+#jeopardylogo {
+	height: 100px;
+	width: 100%;
+	font-family: Copse;
+	color: white;
+	font-size: 80px;
+	border-bottom: 3px solid black;
+	border-top: 3px solid black;
+	background-color: rgba(0, 0, 0, .90);
+	position: fixed;
+  top: 0;
+  z-index: 1;
+}
+
+#startrestartbutton {
+	border-radius: 50%;
+	color: white;
+	font-family: Copse;
+	transition: border-color 250ms;
+  transition: background-color 250ms;
+  z-index: 2
+}
+
+#startrestartbutton.start {
+	position: absolute;
+	background-color: rgba(0, 0, 0, 0.85);
+	border: 3px solid black;
+	height: 200px;
+	width: 200px;
+	color: white;
+	left: 50%;
+	margin-left: -100px;
+	top: 50%;
+	margin-top: -100px;
+	font-size: 35px;
+}
+
+#startrestartbutton.restart {
+	position: fixed;
+	background-color: rgba(0, 0, 0, 1);
+	border: 3px solid white;
+	height: 80px;
+	width: 80px;
+	left: 10px;
+	top: 10px;
+	font-size: large;
+}
+
+#startrestartbutton:hover {
+	background-color: #060ce9;
+}
+
+div.loading {
+	height: 100px;
+	position: fixed;
+	left: 50%;
+	margin-left: -50px;
+	top: 50%;
+	margin-top: -50px;
+}
+
+img.loading {
+	min-height: 200px;
+	max-height: 200px;
+	height: 100%;
+}
+
 table {
-  border: 3px solid black;
-  font-family: Copse;
+  margin-top: 125px;
+  margin-bottom: 25px;
+	margin-left: auto;
+	margin-right: auto;
+	border: 3px solid #060ce9;
+	font-family: Copse;
 }
-thead {
+
+.category-head {
+  font-size: 20px;
   background-color: #060ce9;
-  color: white;
-  font-weight: bold;
-  font-size: larger;
+	color: white;
 }
+
 tbody {
 	background-color: #115ff4;
 }
 
 div {
-	width: 125px;
-	height: 125px;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	text-align: center;
-	word-wrap: break-word;
+  width: 125px;
+  height: 125px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  word-break: break-word;
+  font-family: Copse;
+  color: white;
 }
 
-.modal{
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-  overflow:auto;
-  background-color: rgba(0, 0, 0, 0.85);
-  font-family: Copse
+div.clue {
+  font-size:15px;
+  transition: all 500ms; 
 }
 
-.modal-content{
-  position:fixed;
-  background-color: whitesmoke;
-  margin-left: 15%;
-  margin-right: 15%;
-  margin-top: 15%;
-  border: 3px solid #74119c;
-  width: 70%;
-  height: 200px;
-  display:table-cell;
-  font-size: x-large;
-}
-
-.modal-header{
-  background-color:#8d2ab5;
-  color:white;
-  width:100%;
-  height:25%;
-}
-
-.modal-body{
-  width:100%;
-  vertical-align: middle;
-  height:70%
-} 
-
-.active{
-  background-color: #28a200;
-}
-.started{
-  background-color: #28a200;
-}
-
-.complete{
+.active {
   background-color: #8d2ab5;
 }
+.started {
+  background-color: #8d2ab5;
+  /* transform: rotatey(360deg) */
+}
+
+.complete {
+  background-color: #28a200;
+  /* transform: rotatey(720deg) */
+}
+
+div.clue:hover{
+  background-color:#1055d4 ;
+}
+
+div.started:hover{
+  background-color:#8315af ;
+}
+
+div.complete:hover{
+  background-color:#218300 ;
+}
+
+.clue > img {
+  height: 40px;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	z-index: 1;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	font-family: Copse;
+	background-color: rgba(0, 0, 0, 0.85);
+}
+
+.modal-content {
+	position: fixed;
+	margin-left: 15%;
+	margin-right: 15%;
+	margin-top: 15%;
+	border: 5px solid black;
+	width: 70%;
+	height: 300px;
+	display: table-cell;
+	font-size: x-large;
+}
+
+.modal-header {
+	color: white;
+	width: 100%;
+	height: 15%;
+}
+
+.question {
+	background-color: #8d2ab5;
+	border-color: #74119c;
+}
+
+.answer {
+	background-color: #28a200;
+	border-color: #1c7000;
+}
+
+.modal-body {
+	width: 100%;
+	vertical-align: middle;
+	height: 85%;
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+.modal-text {
+	font-size: 30px;
+}
+
 

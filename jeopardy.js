@@ -1,5 +1,5 @@
 /* ******************************************************************
----------------------------- SETTINGS -------------------------------
+---------------------------- Settings -------------------------------
 ****************************************************************** */
 
 const categories = 6;
@@ -69,6 +69,7 @@ async function fillTable(catNum, cluesPerCat) {
 		catObjsArr.forEach(obj => jeopardyGame.push(obj));
 
 		const jeopardyTable = document.createElement('table');
+		jeopardyTable.setAttribute('id', 'jeopardytable');
 		const catHeadRow = document.createElement('thead');
 
 		for (let category = 0; category < catNum; category++) {
@@ -76,6 +77,7 @@ async function fillTable(catNum, cluesPerCat) {
 			const newDiv = document.createElement('div');
 			newDiv.classList.add('category-head');
 			newDiv.dataset.category = category;
+			newDiv.style.fontSize = properFontSize(catObjsArr[category].title);
 			newDiv.innerText = catObjsArr[category].title;
 			newTd.append(newDiv);
 			catHeadRow.append(newTd);
@@ -91,14 +93,19 @@ async function fillTable(catNum, cluesPerCat) {
 				newDiv.classList.add('clue');
 				newDiv.dataset.category = category;
 				newDiv.dataset.clue = clue;
-				newDiv.innerText = '?';
+				newDiv.innerHTML =
+					'<img class="clueImg" src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fclipartmag.com%2Fimages%2Fanimated-questions-mark-13.png&f=1&nofb=1">';
+
 				newTd.append(newDiv);
 				newTr.append(newTd);
 			}
 			tableBody.append(newTr);
 		}
 		jeopardyTable.append(tableBody);
-		document.body.prepend(jeopardyTable);
+		document.body.append(jeopardyTable);
+
+		// hide loading view after the board is loaded into the DOM
+		hideLoadingView();
 
 		// add event listeners to all clue divs
 		$('.clue').on('click', handleClick);
@@ -108,21 +115,11 @@ async function fillTable(catNum, cluesPerCat) {
 
 	// handleClick moved into fillTable() so that jeopardyBoard variable does not have to be global
 	function handleClick(evt) {
-		// function syncBoardToJeopardyGame() {
-		// 	const completedSpaces = document.querySelectorAll('.complete');
+		let clickedClue = evt.target;
+		if (evt.target.classList.contains('clueImg')) clickedClue = clickedClue.parentElement;
 
-		// 	completedSpaces.forEach(space => {
-		// 		const categoryNum = space.getAttribute('data-category');
-		// 		const clueNum = space.getAttribute('data-clue');
-		// 		const jeopardyObj = jeopardyGame[categoryNum].clues[clueNum];
-		// 		jeopardyObj.showing = 'answer';
-		// 		// console.log(jeopardyObj)
-		// 	});
-		// }
-		// syncBoardToJeopardyGame();
-
-		const categoryNum = evt.target.getAttribute('data-category');
-		const clueNum = evt.target.getAttribute('data-clue');
+		const categoryNum = clickedClue.getAttribute('data-category');
+		const clueNum = clickedClue.getAttribute('data-clue');
 
 		let show = jeopardyGame[categoryNum].clues[clueNum].showing;
 		if (show === 'answer') return;
@@ -130,35 +127,34 @@ async function fillTable(catNum, cluesPerCat) {
 		let question = jeopardyGame[categoryNum].clues[clueNum].question;
 
 		let answer = jeopardyGame[categoryNum].clues[clueNum].answer;
-		if (answer.search('<i>') > -1) {
-			answer = answer.substring(3, answer.length - 4);
-		}
 
 		// console.log(evt.target, show, question, answer);
-		evt.target.classList.add('active');
+		clickedClue.classList.add('active');
+		clickedClue.innerHTML = '';
 		if (show === null) {
 			jeopardyGame[categoryNum].clues[clueNum].showing = 'clue';
-			evt.target.innerText = question;
+
+			console.log(question.length);
+			clickedClue.style.fontSize = properFontSize(question);
+			clickedClue.innerHTML = `${question}`;
 			showModal(question, answer, 'none');
 		}
 		else if (show === 'clue') {
 			jeopardyGame[categoryNum].clues[clueNum].showing = 'answer';
-			evt.target.innerText = answer;
+			console.log(answer.length);
+			clickedClue.style.fontSize = properFontSize(answer);
+			clickedClue.innerHTML = `${answer}`;
 			showModal(question, answer, 'clue');
 		}
 	}
 }
-
-fillTable(categories, cluesPerCat);
 
 /********************************************************************
  -------------------------- showModal() -----------------------------
  ********************************************************************
 
  DESCRIPTION:
-  --> shows a modal when passed content text and a title
-  --> adds event listener to remove modal when user clicks outside of modal
-  --> adds event listener to show answer if modal is clicked when showing question
+  --> shows a modal when passed content text, a title, and the showing state of the object
   --> REFERENCE: https://www.w3schools.com/howto/howto_css_modals.asp
   */
 
@@ -169,12 +165,12 @@ function showModal(question, answer, showing) {
 
 	let modalText = `
   <div id="jeopardyModalWindow" class="modal">
-    <div id="jeopardyModalContent" class="modal-content">
-      <div id="jeopardyModalHeader" class="modal-header">
+    <div id="jeopardyModalContent" class="modal-content ${showTitle.toLowerCase()}">
+      <div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
         <h2 id="jeopardyModalTitle">${showTitle}</h2>
       </div>
       <div id="jeopardyModalBody" class="modal-body">
-        <p id="jeopardyModalText">${showText}</p>
+        <p id="jeopardyModalText" class="modal-text">${showText}</p>
       </div>
     </div>
   </div>
@@ -185,44 +181,93 @@ function showModal(question, answer, showing) {
 	newModalWindow.style.display = 'block';
 }
 
-/** Wipe the current Jeopardy board, show the loading spinner,
- * and update the button used to fetch data.
- */
+/********************************************************************
+ -------------------------- setupAndStart() -------------------------
+ ********************************************************************
 
-function showLoadingView() {}
+ DESCRIPTION:
+  --> shows the loading view and hides the start/restart
+  --> runs fillTable() which runs the APIs and builds the game board in the DOM
+  --> the loading view is hidden in the fillTable() function immediately after the game board is loaded into the DOM
+  */
 
-/** Remove the loading spinner and update the button used to fetch data. */
+async function setupAndStart() {
+	showLoadingView();
+	let fillTableRes = await fillTable(categories, cluesPerCat);
+}
 
-function hideLoadingView() {}
+/********************************************************************
+ ------------------------- showLoadingView() ------------------------
+ ********************************************************************
 
-/** Start game:
- *
- * - get random category Ids
- * - get data for each category
- * - create HTML table
- * */
+ DESCRIPTION:
+  --> removes any existing game board from the DOM
+  --> hides the start/restart button
+  --> creates and dislays the loading view
+  */
 
-async function setupAndStart() {}
+function showLoadingView() {
+	document.querySelector('#startrestartbutton').style.visibility = 'hidden';
 
-/** On click of start / restart button, set up game. */
+	const spinnerImg = document.createElement('img');
 
-// TODO
+	spinnerImg.src =
+		'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn2.scratch.mit.edu%2Fget_image%2Fgallery%2F1832260_170x100.png&f=1&nofb=1';
+	spinnerImg.classList.add('loading');
 
-/** On page load, add event handler for clicking clues */
+	const loadingDiv = document.createElement('div');
+	loadingDiv.classList.add('loading');
+	loadingDiv.append(spinnerImg);
+	document.body.prepend(loadingDiv);
 
-// TODO
+	const jeopardytable = document.querySelector('#jeopardytable');
+	if (jeopardytable !== null) jeopardytable.remove();
+}
 
-// .click(function(evt){
-//   console.log('clicked',evt.target)
-// })
+/********************************************************************
+ ------------------------- hideLoadingView() ------------------------
+ ********************************************************************
 
-// add event listener to window
+ DESCRIPTION:
+  --> removes the loading spinner and updates the start/restart button.
+  */
+
+function hideLoadingView() {
+	const loadingDiv = document.querySelector('div.loading');
+	loadingDiv.remove();
+
+	const startRestartBtn = document.querySelector('#startrestartbutton');
+	startRestartBtn.style.visibility = 'visible';
+	startRestartBtn.innerText = 'New Game';
+	startRestartBtn.classList.remove('start');
+	startRestartBtn.classList.add('restart');
+}
+
+/********************************************************************
+ --------------------- Window Event Listener ------------------------
+ ********************************************************************
+
+ DESCRIPTION:
+  --> adds event listener to remove modal when user clicks outside of modal
+  --> adjusts classes to enable css formatting
+  */
 window.addEventListener('click', function(e) {
 	const newModalWindow = document.querySelector('#jeopardyModalWindow');
 	const newModalBody = document.querySelector('#jeopardyModalBody');
 	const newModalHeader = document.querySelector('#jeopardyModalHeader');
+	const newModalText = document.querySelector('#jeopardyModalText');
+	const newModalTitle = document.querySelector('#jeopardyModalTitle');
+	const newModalContent = document.querySelector('#jeopardyModalContent');
 	const activeDiv = document.querySelector('.active');
-	if (e.target == newModalWindow || e.target == newModalBody || e.target == newModalHeader) {
+	if (
+		e.target == newModalWindow ||
+		e.target == newModalBody ||
+		e.target == newModalHeader ||
+		e.target == newModalText ||
+		e.target == newModalTitle ||
+		e.target == newModalText ||
+		e.target == newModalContent
+	) {
 		if (activeDiv.classList.contains('started')) {
 			activeDiv.classList.add('complete');
 		}
@@ -231,3 +276,41 @@ window.addEventListener('click', function(e) {
 		newModalWindow.remove();
 	}
 });
+
+/********************************************************************
+ ----------------------- Auxillary Functions ------------------------
+ *******************************************************************/
+
+// returns the font size that fits best in the the space given the character length of the string.
+function properFontSize(string) {
+	if (string.length > 200) return '8px';
+	if (string.length > 150) return '10px';
+	if (string.length > 100) return '12px';
+	if (string.length > 90) return '13px';
+	if (string.length > 80) return '14px';
+	if (string.length > 70) return '15px';
+	if (string.length > 60) return '16px';
+	if (string.length > 50) return '18px';
+	if (string.length > 40) return '20px';
+	if (string.length > 30) return '22px';
+	if (string.length > 20) return '24px';
+	if (string.length > 10) return '27px';
+	return '30px';
+}
+
+/********************************************************************
+ ------------------------- When DOM Loads----------------------------
+ *******************************************************************/
+
+// CREATE BUTTON TO START GAME
+const startRestartBtn = document.createElement('div');
+startRestartBtn.setAttribute('id', 'startrestartbutton');
+startRestartBtn.innerText = 'Start Jeopardy!';
+startRestartBtn.classList.add('start');
+startRestartBtn.addEventListener('click', setupAndStart);
+document.body.prepend(startRestartBtn);
+
+const logoDiv = document.createElement('div');
+logoDiv.setAttribute('id', 'jeopardylogo');
+logoDiv.innerText = 'JEOPARDY!';
+document.body.prepend(logoDiv);
