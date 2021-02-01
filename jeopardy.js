@@ -1,156 +1,139 @@
 /********************************************************************
-------------------- Settings & Table of Contents --------------------
-****************************************************************** */
+--------------------- Settings & Table of Contents ------------------
+*********************************************************************
 
-const categories = 6;
-const cluesPerCat = 5;
+INSTRUCTIONS:
+ --> update the CATEGORIES const with an integer to change the number of categories
+ --> update the CLUES const with an integer to change the number of clues per category
+ --> if adding additional sounds, be sure to add the audio element to the arrayAudio in [(9-d) Add Sounds to DOM] so that the audio functions properly in [(8-c) playAudio()]
+
+CUSTOMIZATIONS:
+ --> update the SPACEIMAGEURL const with a link to change the image displayed on the game spaces before they are activated
+ --> update the SPINNERIMAGEURL const with a link to change the image displayed when the game is loading
+ */
+
+const CATEGORIES = 6;
+const CLUES = 5;
+
+const SPACEIMAGEURL =
+	'https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fclipartmag.com%2Fimages%2Fanimated-questions-mark-13.png&f=1&nofb=1';
+
+const SPINNERIMGURL =
+	'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn2.scratch.mit.edu%2Fget_image%2Fgallery%2F1832260_170x100.png&f=1&nofb=1';
 
 /*___________________________________________________________________
 
 TABLE OF CONTENTS
- (1) getCategoryIds()
- (2) getCategory()
- (3) fillTable()
- (4) showModal()
-   4-a) handleClick()
- (5) setupAndStart()
- (6) showLoadingView()
- (7) hideLoadingView()
- (8) Window Event Listener
- (9) Auxillary Functions
-   9-a) properFontSize()
-   9-b) showModal()
- (10) When DOM Loads
-   10-a) Window Event Listener
-   10-b) Create Start/Restart Button
-   10-c) Create Game Logo
+ 1: getCategoryIds()
+ 2: getCategory()
+ 3: fillTable()
+	 (3-a) handleClick()
+ 4: generateGameBoard()
+ 5: setupAndStart()
+ 6: showLoadingView()
+ 7: hideLoadingView()
+ 8: Auxillary Functions
+   (8-a) properFontSize()
+	 (8-b) showModal()
+	 (8-c) playAudio()
+	 (8-d) makeAudioButton()
+ 9: When DOM Loads
+	 (9-a) Window Event Listener for Modal Click
+	 (9-b) Create Start/Restart Button
+	 (9-c) Create Game Logo
+	 (9-d) Add Sounds to DOM
 */
 
-
 /********************************************************************
- ----------------------- getCategoryIds() ---------------------------
+ ----------------------- 1: getCategoryIds() ------------------------
  ********************************************************************
 
 DESCRIPTION:
  --> gets 1000 categories from API
- --> removes categories with fewer clues per category than required (cluesPerCat)
- --> Returns array containing the correct number (categories) of random category ids */
+ --> removes categories with fewer clues per category than required (CLUES)
+ --> Returns array containing the correct number (CATEGORIES) of random category ids */
 
-async function getCategoryIds(numCategories, minClues) {
-	const categoriesArr = [];
+async function getCategoryIds(numCategories, numClues) {
+	const arrCategories = [];
 	for (let offset = 0; offset < 10; offset++) {
 		const res = await axios.get('https://jservice.io/api/categories', {
 			params : { count: 100, offset: `${offset * 100}` }
 		});
 		for (let category of res.data) {
-			if (category.clues_count >= minClues) categoriesArr.push(category.id);
+			if (category.clues_count >= numClues) arrCategories.push(category.id);
 		}
 	}
-
-	return _.sampleSize(categoriesArr, numCategories);
+	return _.sampleSize(arrCategories, numCategories);
 }
 
 /********************************************************************
- ------------------------- getCategory() ----------------------------
+ ----------------------- 2: getCategory() ---------------------------
  ********************************************************************
 
  DESCRIPTION:
  --> returns an object with a category title and clue information based on a category ID */
 
-async function getCategory(catId) {
-	const res = await axios.get('https://jservice.io/api/category', { params: { id: catId } });
+async function getCategory(idCategory) {
+	const res = await axios.get('https://jservice.io/api/category', { params: { id: idCategory } });
 
-  //creates array of clue objects
-	const cluesArr = res.data.clues.map(clue => {
-		return { question: clue.question, answer: clue.answer, showing: null, value: clue.value };
+	//creates array of clue objects
+	const arrClues = res.data.clues.map(clue => {
+		return {
+			question : clue.question,
+			answer   : clue.answer,
+			showing  : null,
+			value    : clue.value
+		};
 	});
 
-  // creates category object containing the category title and an array of all clues
-	const catObj = {};
-	catObj.title = res.data.title;
-	catObj.clues = cluesArr;
-	return catObj;
+	// creates category object containing the category title and an array of all clues
+	const objCategory = {};
+	objCategory.title = res.data.title;
+	objCategory.clues = arrClues;
+	return objCategory;
 }
 
 /********************************************************************
- -------------------------- fillTable() -----------------------------
+ -------------------------- 3: fillTable() --------------------------
  ********************************************************************
 
  DESCRIPTION:
-  --> catIdsArr: create array of category IDs based on passing the number of categories and number of clues per category to the getCategoryIds function
-  --> catObjsArr: for every id in catIdsArr, passes id integer to getCategory() and receives an object with category information; contains an array of objects containing category information
-  --> creates table elements in DOM based on number of categories, clues per category, and category titles received from API */
+  --> create array of category IDs (arrCategoryIds) by passing the number of categories and number of clues per category to the [1: getCategoryIds()] function
+	--> for every id in arrCategoryIds, passes id integer to [2: getCategory()] and receives an object with category information which is put into an array (arrCategoryObjects)
+	--> passes numCategory, numClues, and arrCategoryObjects to [4: generateGameBoard()] to create table elements in DOM
+	--> uses lodash sampling tool to randomize the order of the clues; in the event that there are more clues in the object than required, will take a random set of clues
+	--> hides the load view and adds handleClick event listener to the all .clue divs
+	--> jeopardyGame is referenced by handleClick to provide information to game spaces divs and modals */
 
-async function fillTable(catNum, cluesPerCat) {
+async function fillTable(numCategory, numClues) {
 	const jeopardyGame = [];
-	const catIdsArr = await getCategoryIds(catNum, cluesPerCat);
+	const arrCategoryIds = await getCategoryIds(numCategory, numClues);
 
-  // get array of category objects
-	Promise.all(catIdsArr.map(getCategory)).then(catObjsArr => {
-    
-    // transfer each object to the jeopardy game
-    catObjsArr.forEach(obj =>{
+	// get array of category objects
+	Promise.all(arrCategoryIds.map(getCategory)).then(arrCategoryObjects => {
+		// transfer each object to the jeopardy game with a random sampling of clues
+		arrCategoryObjects.forEach(obj => {
+			const sampleClues = _.sampleSize(obj.clues, numClues);
+			obj.clues = sampleClues;
+			jeopardyGame.push(obj);
+		});
 
-      // if the category contains more clues than requred, take a sampling of the clues to include in the game board
-      if (obj.clues.length>cluesPerCat){
-        const sampleOfClues=_.sampleSize(obj.clues,cluesPerCat)
-        obj.clues=sampleOfClues
-      }
-      // push category object to the jeopardy game variable
-      jeopardyGame.push(obj)
-    } );
+		// call [4: generateGameBoard()]
+		generateGameBoard(numCategory, numClues, arrCategoryObjects);
 
-    // crerate game board
-		const jeopardyTable = document.createElement('table');
-		jeopardyTable.setAttribute('id', 'jeopardytable');
-		const catHeadRow = document.createElement('thead');
-
-    // create table head and data cells and add category titles; append to jeopardy table
-		for (let category = 0; category < catNum; category++) {
-			const newTd = document.createElement('td');
-			const newDiv = document.createElement('div');
-			newDiv.classList.add('category-head');
-			newDiv.dataset.category = category;
-			newDiv.style.fontSize = properFontSize(catObjsArr[category].title);
-			newDiv.innerText = catObjsArr[category].title;
-			newTd.append(newDiv);
-			catHeadRow.append(newTd);
-    }
-		jeopardyTable.append(catHeadRow);
-
-    // create table body, rows, and spaces named with data attributes denoting each space's category and row; append all to jeopardy table; append table to document body
-		const tableBody = document.createElement('tbody');
-    for (let clue = 0; clue < cluesPerCat; clue++) {
-			const newTr = document.createElement('tr');
-			for (let category = 0; category < catNum; category++) {
-				const newTd = document.createElement('td');
-				const newDiv = document.createElement('div');
-				newDiv.classList.add('clue');
-				newDiv.dataset.category = category;
-				newDiv.dataset.clue = clue;
-				newDiv.innerHTML =
-					'<img class="clueImg" src="https://external-content.duckduckgo.com/iu/?u=http%3A%2F%2Fclipartmag.com%2Fimages%2Fanimated-questions-mark-13.png&f=1&nofb=1">';
-
-				newTd.append(newDiv);
-				newTr.append(newTd);
-			}
-			tableBody.append(newTr);
-		}
-		jeopardyTable.append(tableBody);
-		document.body.append(jeopardyTable);
-
-		// hide loading view after the board is loaded into the DOM
+		// call [8: hideLoadingView()]
 		hideLoadingView();
 
-		// add event listeners to all clue divs
+		// add event listener [3-a) handleClick()] to all .clue divs
 		$('.clue').on('click', handleClick);
 	});
 
-  //_________________________________________________________________
-  
-  /* -----> HandleClick() <-----
-  DESCRIPTION:
-   --> handleClick moved into fillTable() so that jeopardyBoard variable does not have to be global */
+	//_________________________________________________________________
+	/* -----> (3-a) HandleClick() <-----
+	
+	DESCRIPTION:
+	 --> handleClick is part of fillTable() so that jeopardyBoard variable does not have to be global
+	 --> changes the .clue divs and shows question/answer modals */
 
 	function handleClick(evt) {
 		let clickedClue = evt.target;
@@ -159,27 +142,23 @@ async function fillTable(catNum, cluesPerCat) {
 		const categoryNum = clickedClue.getAttribute('data-category');
 		const clueNum = clickedClue.getAttribute('data-clue');
 
+		// if the clue space has already displayed the answer modal then return; otherwise change the text of the .clue div and show a modal
 		let show = jeopardyGame[categoryNum].clues[clueNum].showing;
 		if (show === 'answer') return;
 
 		let question = jeopardyGame[categoryNum].clues[clueNum].question;
-
 		let answer = jeopardyGame[categoryNum].clues[clueNum].answer;
 
-		// console.log(evt.target, show, question, answer);
 		clickedClue.classList.add('active');
 		clickedClue.innerHTML = '';
 		if (show === null) {
 			jeopardyGame[categoryNum].clues[clueNum].showing = 'clue';
-
-			console.log(question.length);
 			clickedClue.style.fontSize = properFontSize(question);
 			clickedClue.innerHTML = `${question}`;
 			showModal(question, answer, 'none');
 		}
 		else if (show === 'clue') {
 			jeopardyGame[categoryNum].clues[clueNum].showing = 'answer';
-			console.log(answer.length);
 			clickedClue.style.fontSize = properFontSize(answer);
 			clickedClue.innerHTML = `${answer}`;
 			showModal(question, answer, 'clue');
@@ -188,21 +167,83 @@ async function fillTable(catNum, cluesPerCat) {
 }
 
 /********************************************************************
- -------------------------- setupAndStart() -------------------------
+ ---------------------- 4: generateGameBoard() ----------------------
  ********************************************************************
 
  DESCRIPTION:
-  --> shows the loading view and hides the start/restart
-  --> runs fillTable() which runs the APIs and builds the game board in the DOM
-  --> the loading view is hidden in the fillTable() function immediately after the game board is loaded into the DOM */
+  --> creates a game board in the DOM based on the number of categories, the number of clues per category, and an array of category objects containing clues */
 
-async function setupAndStart() {
-	showLoadingView();
-	let fillTableRes = await fillTable(categories, cluesPerCat);
+function generateGameBoard(numCategory, numClues, arrCategoryObjects) {
+	// create game board
+	const jeopardyTable = document.createElement('table');
+	jeopardyTable.setAttribute('id', 'jeopardytable');
+	const catHeadRow = document.createElement('thead');
+
+	// create table head and data cells and add category titles; append to jeopardy table
+	for (let category = 0; category < numCategory; category++) {
+		const newTd = document.createElement('td');
+		const newDiv = document.createElement('div');
+		newDiv.classList.add('category-head');
+		newDiv.dataset.category = category;
+		newDiv.style.fontSize = properFontSize(arrCategoryObjects[category].title);
+		newDiv.innerText = arrCategoryObjects[category].title;
+		newTd.append(newDiv);
+		catHeadRow.append(newTd);
+	}
+	jeopardyTable.append(catHeadRow);
+
+	// create table body, rows, and spaces named with data attributes denoting each space's category and row; append all to jeopardy table; append table to document body
+	const tableBody = document.createElement('tbody');
+	for (let clue = 0; clue < numClues; clue++) {
+		const newTr = document.createElement('tr');
+		for (let category = 0; category < numCategory; category++) {
+			const newTd = document.createElement('td');
+			const newDiv = document.createElement('div');
+			newDiv.classList.add('clue');
+			newDiv.dataset.category = category;
+			newDiv.dataset.clue = clue;
+			newDiv.innerHTML = `<img class="clueImg" src=${SPACEIMAGEURL}>`;
+
+			newTd.append(newDiv);
+			newTr.append(newTd);
+		}
+		tableBody.append(newTr);
+	}
+	jeopardyTable.append(tableBody);
+	document.body.append(jeopardyTable);
 }
 
 /********************************************************************
- ------------------------- showLoadingView() ------------------------
+ ------------------------- 5: setupAndStart() -----------------------
+ ********************************************************************
+
+ DESCRIPTION:
+	--> activated by "Start!" button at begining and "New Game" button once the game is started
+  --> shows the loading view and hides the start/restart
+  --> runs [3: fillTable()] which runs the APIs and builds the game board in the DOM
+	--> the loading view is hidden in the [3: fillTable()] function immediately after the game board is loaded into the DOM
+	--> plays different sound if the game is loading for the first time or if it is being restarted
+	--> removes audio control button before load screen then add it again after loading is complete */
+
+async function setupAndStart() {
+	$('.audiobutton').remove();
+
+	const startrestartbutton = document.querySelector('#startrestartbutton');
+	if (startrestartbutton.classList.contains('firstclick')) {
+		playAudio(audio_thisIsJeopardy);
+		startrestartbutton.classList.remove('firstclick');
+	}
+	else {
+		playAudio(audio_boardFill);
+	}
+
+	showLoadingView();
+	let fillTableRes = await fillTable(CATEGORIES, CLUES);
+	makeAudioButton(audio_themeSong, 'Start Theme Song', 'Stop Theme Song');
+}
+
+/********************************************************************
+ ------------------------ 6: showLoadingView() ----------------------
  ********************************************************************
 
  DESCRIPTION:
@@ -215,8 +256,7 @@ function showLoadingView() {
 
 	const spinnerImg = document.createElement('img');
 
-	spinnerImg.src =
-		'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdn2.scratch.mit.edu%2Fget_image%2Fgallery%2F1832260_170x100.png&f=1&nofb=1';
+	spinnerImg.src = SPINNERIMGURL;
 	spinnerImg.classList.add('loading');
 
 	const loadingDiv = document.createElement('div');
@@ -229,7 +269,7 @@ function showLoadingView() {
 }
 
 /********************************************************************
- ------------------------- hideLoadingView() ------------------------
+ ------------------------ 7: hideLoadingView() ----------------------
  ********************************************************************
 
  DESCRIPTION:
@@ -247,10 +287,10 @@ function hideLoadingView() {
 }
 
 /********************************************************************
- ----------------------- Auxillary Functions ------------------------
+ ---------------------- 8: Auxillary Functions ----------------------
  *******************************************************************/
 
-/* -----> properFontSize() <-----
+/* -----> (8-a) properFontSize() <-----
 DESCRIPTION:
  --> returns the font size that fits best in the the space given the character length of the string. */
 
@@ -269,16 +309,14 @@ function properFontSize(string) {
 	if (string.length > 10) return '27px';
 	return '30px';
 }
-
 // __________________________________________________________________
-
-/* -----> showModal() <-----
+/* -----> (8-b) showModal() <-----
 
 DESCRIPTION:
  --> shows a modal when passed content text, a title, and the showing state of the object
  --> REFERENCE: https://www.w3schools.com/howto/howto_css_modals.asp */
 
- function showModal(question, answer, showing) {
+function showModal(question, answer, showing) {
 	let showTitle, showText;
 	showing === 'none' ? (showTitle = 'Question') : (showTitle = 'Answer');
 	showing === 'none' ? (showText = question) : (showText = answer);
@@ -300,71 +338,127 @@ DESCRIPTION:
 	const newModalWindow = document.querySelector('#jeopardyModalWindow');
 	newModalWindow.style.display = 'block';
 }
+//___________________________________________________________________
+/* -----> (8-c) playAudio() <-----
+
+DESCRIPTION:
+ --> stops other audio, starts audio at beginning, plays audio */
+
+function playAudio(audioElement) {
+	// pause all sounds loaded into arrayAudio in [9-d: Add Sounds to DOM]
+	for (let sound of arrayAudio) {
+		sound.pause();
+	}
+
+	// restart and play sound
+	audioElement.currentTime = 0;
+	audioElement.play();
+}
+//___________________________________________________________________
+/* -----> (8-d) makeAudioButton() <-----
+
+DESCRIPTION:
+ --> creates and appends a button that plays and pauses a sound
+ --> button text changes based on values passed to function
+ --> interacts with [(8-c) playAudio()] to stop other sounds before starting button activated sound from the start */
+
+function makeAudioButton(audioElement, playText, pauseText) {
+	const audioBtn = document.createElement('div');
+	audioBtn.classList.add('audiobutton');
+
+	// add event listener
+	audioBtn.addEventListener('click', function() {
+		audioBtn.classList.toggle('playing');
+		if (audioElement.paused === true) {
+			playAudio(audioElement);
+			audioBtn.innerText = pauseText;
+		}
+		else {
+			audioElement.pause();
+			audioBtn.innerText = playText;
+		}
+	});
+	audioBtn.innerText = playText;
+	document.body.append(audioBtn);
+}
 
 /********************************************************************
- ------------------------- When DOM Loads ---------------------------
+ ------------------------ 9: When DOM Loads -------------------------
  *******************************************************************/
 
-/* -----> Window Event Listener <-----
+/* -----> (9-a) Window Event Listener for Modal Click <-----
  
- DESCRIPTION:
-  --> adds event listener to remove modal when user clicks outside of modal
-  --> adjusts classes to enable css formatting */
+DESCRIPTION:
+  --> adds event listener to remove question/answer modal when user clicks anywhere on modal or window
+  --> adjusts game space div classes to enable css formatting */
 
- window.addEventListener('click', function(e) {
+window.addEventListener('click', function(e) {
 	const newModalWindow = document.querySelector('#jeopardyModalWindow');
-	const newModalBody = document.querySelector('#jeopardyModalBody');
-	const newModalHeader = document.querySelector('#jeopardyModalHeader');
-	const newModalText = document.querySelector('#jeopardyModalText');
-	const newModalTitle = document.querySelector('#jeopardyModalTitle');
-	const newModalContent = document.querySelector('#jeopardyModalContent');
 	const activeDiv = document.querySelector('.active');
 	if (
 		e.target == newModalWindow ||
-		e.target == newModalBody ||
-		e.target == newModalHeader ||
-		e.target == newModalText ||
-		e.target == newModalTitle ||
-		e.target == newModalText ||
-		e.target == newModalContent
+		e.target == document.querySelector('#jeopardyModalBody') ||
+		e.target == document.querySelector('#jeopardyModalHeader') ||
+		e.target == document.querySelector('#jeopardyModalText') ||
+		e.target == document.querySelector('#jeopardyModalTitle') ||
+		e.target == document.querySelector('#jeopardyModalContent')
 	) {
+		// if the space has not been started, add class of "started"
+		// if the space has been started, add class of "complete" and remove "started"
+		// remove class of "active" when leaving modal
 		if (activeDiv.classList.contains('started')) {
-      activeDiv.classList.add('complete');
-      activeDiv.classList.remove('started')
-    } else {
-      activeDiv.classList.add('started');
-    }
+			activeDiv.classList.add('complete');
+			activeDiv.classList.remove('started');
+		}
+		else {
+			activeDiv.classList.add('started');
+		}
 		activeDiv.classList.remove('active');
 		newModalWindow.remove();
 	}
 });
-
 //___________________________________________________________________
-
-/* -----> Create Start/Restart Button <-----
+/* -----> (9-b) Create Start/Restart Button <-----
  
  DESCRIPTION:
   --> creates the start button and adds it to the document body */
-function createStartREstartButton(){
-  const startRestartBtn = document.createElement('div');
-  startRestartBtn.setAttribute('id', 'startrestartbutton');
-  startRestartBtn.innerText = 'Start!';
-  startRestartBtn.classList.add('start');
-  startRestartBtn.addEventListener('click', setupAndStart);
-  return startRestartBtn
-}
-document.body.prepend(createStartREstartButton())
-
+const startRestartBtn = document.createElement('div');
+startRestartBtn.setAttribute('id', 'startrestartbutton');
+startRestartBtn.innerText = 'Start!';
+startRestartBtn.classList.add('start');
+startRestartBtn.classList.add('firstclick');
+startRestartBtn.addEventListener('click', setupAndStart);
+document.body.prepend(startRestartBtn);
 //___________________________________________________________________
+/* -----> (9-c) Create Game Logo <-----
 
-/* -----> Create Game Logo <-----
- 
  DESCRIPTION:
   --> creates the game logo and adds it to the document body */
-function createLogo(){
-  const logoDiv = document.createElement('div');
-  logoDiv.setAttribute('id', 'jeopardylogo');
-  logoDiv.innerText = 'JEOPARDY!';
-  return logoDiv
-}
-document.body.prepend(createLogo());
+
+const logoDiv = document.createElement('div');
+logoDiv.setAttribute('id', 'jeopardylogo');
+logoDiv.innerText = 'JEOPARDY!';
+document.body.prepend(logoDiv);
+//___________________________________________________________________
+/* -----> (9-d) Add Sounds to DOM <-----
+
+ DESCRIPTION:
+	--> appends sounds into the DOM that are used by other funnctions
+	--> sounds are added to arrayAudio so that they can be cycled through and systematically paused before playing another sound in  [(8-c) playAudio()]  */
+const audio_themeSong = document.createElement('audio');
+audio_themeSong.setAttribute('id', 'themesong');
+audio_themeSong.src = 'sounds/Jeopardy-theme-song.mp3';
+document.body.append(audio_themeSong);
+
+const audio_boardFill = document.createElement('audio');
+audio_boardFill.setAttribute('id', 'boardfill');
+audio_boardFill.src = 'sounds/board-fill.mp3';
+document.body.append(audio_boardFill);
+
+const audio_thisIsJeopardy = document.createElement('audio');
+audio_thisIsJeopardy.setAttribute('id', 'audio_thisisjeopardy');
+audio_thisIsJeopardy.src = 'sounds/this-is.mp3';
+document.body.append(audio_thisIsJeopardy);
+
+// add sounds to array for use in other function
+const arrayAudio = [ audio_themeSong, audio_boardFill, audio_thisIsJeopardy ];

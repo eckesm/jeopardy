@@ -10,6 +10,7 @@
 /* REFERENCE: https://cssgradient.io/ */
 body {
 	margin: 0px;
+	background-color: rgba(0, 0, 0, 0.5);
 }
 
 #jeopardylogo {
@@ -28,6 +29,8 @@ body {
 
 #startrestartbutton {
 	border-radius: 50%;
+	border: 3px solid white;
+	background-color: rgba(0, 0, 0, 1);
 	color: white;
 	font-family: Copse;
   transition-property: background-color,transform;
@@ -37,8 +40,6 @@ body {
 
 #startrestartbutton.start {
 	position: absolute;
-	background-color: rgba(0, 0, 0, 0.85);
-	border: 3px solid black;
 	height: 200px;
 	width: 200px;
 	color: white;
@@ -51,17 +52,38 @@ body {
 
 #startrestartbutton.restart {
 	position: fixed;
-	background-color: rgba(0, 0, 0, 1);
-	border: 3px solid white;
 	height: 80px;
 	width: 80px;
 	left: 10px;
 	top: 10px;
-	font-size: large;
+  font-size: large;
 }
 
 #startrestartbutton:hover {
 	background-color: #060ce9;
+	transform: scale(1.1);
+}
+
+.audiobutton{
+  position:fixed;
+  height:70px;
+  width:70px;
+  background-color: black;
+  z-index: 2;
+  right: 15px;
+  top: 15px;
+  border: 3px solid white;
+  transition-duration: 500ms;
+  font-family: Copse;
+}
+
+.audiobutton:hover{
+  background-color:#28a200;
+	transform: scale(1.1);
+}
+
+.audiobutton.playing:hover{
+  background-color: red;
 	transform: scale(1.1);
 }
 
@@ -87,6 +109,7 @@ table {
 	margin-right: auto;
 	border: 5px solid #060ce9;
 	font-family: Copse;
+	background-color: white;
 }
 
 .category-head {
