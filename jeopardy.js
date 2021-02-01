@@ -5,6 +5,7 @@
 INSTRUCTIONS:
  --> update the CATEGORIES const with an integer to change the number of categories
  --> update the CLUES const with an integer to change the number of clues per category
+ --> alternatively, can manipulate [(9-b) Create Start/Restart Button] to create start buttons that make board with different numbers of categories or clues 
  --> if adding additional sounds, be sure to add the audio element to the arrayAudio in [(9-d) Add Sounds to DOM] so that the audio functions properly in [(8-c) playAudio()]
 
 CUSTOMIZATIONS:
@@ -75,7 +76,6 @@ async function getCategoryIds(numCategories, numClues) {
 
 async function getCategory(idCategory) {
 	const res = await axios.get('https://jservice.io/api/category', { params: { id: idCategory } });
-
 	//creates array of clue objects
 	const arrClues = res.data.clues.map(clue => {
 		return {
@@ -225,7 +225,7 @@ function generateGameBoard(numCategory, numClues, arrCategoryObjects) {
 	--> plays different sound if the game is loading for the first time or if it is being restarted
 	--> removes audio control button before load screen then add it again after loading is complete */
 
-async function setupAndStart() {
+async function setupAndStart(numCategories, numClues) {
 	$('.audiobutton').remove();
 
 	const startrestartbutton = document.querySelector('#startrestartbutton');
@@ -238,7 +238,8 @@ async function setupAndStart() {
 	}
 
 	showLoadingView();
-	let fillTableRes = await fillTable(CATEGORIES, CLUES);
+	// let fillTableRes = await fillTable(CATEGORIES, CLUES);
+	await fillTable(numCategories, numClues);
 	makeAudioButton(audio_themeSong, 'Start Theme Song', 'Stop Theme Song');
 }
 
@@ -277,7 +278,7 @@ function showLoadingView() {
 
 function hideLoadingView() {
 	const loadingDiv = document.querySelector('div.loading');
-	loadingDiv.remove();
+	if (loadingDiv) loadingDiv.remove();
 
 	const startRestartBtn = document.querySelector('#startrestartbutton');
 	startRestartBtn.style.visibility = 'visible';
@@ -421,14 +422,21 @@ window.addEventListener('click', function(e) {
 /* -----> (9-b) Create Start/Restart Button <-----
  
  DESCRIPTION:
-  --> creates the start button and adds it to the document body */
-const startRestartBtn = document.createElement('div');
-startRestartBtn.setAttribute('id', 'startrestartbutton');
-startRestartBtn.innerText = 'Start!';
-startRestartBtn.classList.add('start');
-startRestartBtn.classList.add('firstclick');
-startRestartBtn.addEventListener('click', setupAndStart);
-document.body.prepend(startRestartBtn);
+	--> creates the start button and adds it to the document body
+	--> button defaults to building a board based on settings at top of script */
+
+function createStartRestartButton(numCategories,numClues){
+	const startRestartBtn = document.createElement('div');
+	startRestartBtn.setAttribute('id', 'startrestartbutton');
+	startRestartBtn.innerText = 'Start!';
+	startRestartBtn.classList.add('start');
+	startRestartBtn.classList.add('firstclick');
+	startRestartBtn.addEventListener('click', function() {
+		setupAndStart(numCategories, numClues);
+	})
+	return startRestartBtn
+}	;
+document.body.prepend(createStartRestartButton(CATEGORIES,CLUES));
 //___________________________________________________________________
 /* -----> (9-c) Create Game Logo <-----
 
