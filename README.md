@@ -1,5 +1,8 @@
 # Jeopardy
 
+## Play Game
+https://eckesm.github.io/jeopardy/
+
 ## Branches
 **main**: contains only the html, js, and css files requied to play the Jeopardy game  
 **dev-branch**: also contains testing files jeopardy-test.html and jeopardy-test.js
