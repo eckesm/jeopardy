@@ -1,0 +1,279 @@
+/* some colors you may find useful:
+  #115ff4
+  #060ce9
+  #28a200
+  #1c7000
+  #8d2ab5
+  #74119c
+*/
+
+body {
+	margin: 0px;
+	background-color: rgba(0, 0, 0, 0.5);
+}
+
+@media screen and (max-width: 500px){
+	#jeopardylogo{
+		height: 70px;
+		font-size: 11vw;
+	}
+	table{
+		margin-top: 210px;
+	}
+	#startrestartbutton.restart{
+		position:fixed;
+		top:8px;
+		left:3px;
+		z-index: 1;
+		height: 55px;
+		width: 55px;
+		font-size: 15px;
+	}
+	.audiobutton{
+		position:fixed;
+		top:8px;
+		right:3px;
+		z-index: 1;
+		height:55px;
+		width:55px;
+		font-size: 13px;
+	}
+	.modal-content {
+		margin-left: 3vw;
+		margin-top: 5vh;
+		width: 92vw;
+		height: 85vh;
+	}
+	img.loading {
+		width: 90vw;
+	}
+}
+
+@media screen and (min-width: 500px){
+	#jeopardylogo{
+		height: 100px;
+		font-size: 60px;
+	}
+	table{
+		margin-top: 125px;
+	}
+	#startrestartbutton.restart{
+		position:fixed;
+		top:10px;
+		left:10px;
+		z-index: 1;
+		height: 80px;
+		width: 80px;
+		font-size: large;
+	}
+	.audiobutton{
+		position:fixed;
+		top:15px;
+		right:15px;
+		z-index: 1;
+		height:70px;
+		width:70px;
+		font-size: large;
+	}
+	.modal-content {
+		margin-left: 14vw;
+		margin-top: 20vh;
+		width: 70vw;
+		height: 60vh;
+	}
+	img.loading {
+		min-height: 200px;
+		max-height: 200px;
+		height: 100%;
+	}
+}
+
+.modal-content {
+	position: fixed;
+	display: table-cell;
+	font-size: 2rem;
+	border: 3px solid black;
+}
+
+
+#jeopardylogo {
+	width: 100%;
+	font-family: Copse;
+	color: white;
+	border-bottom: 3px solid black;
+	border-top: 3px solid black;
+	background-color: rgba(0, 0, 0, .90);
+	position: fixed;
+	top: 0;
+	z-index: 1;
+}
+
+#startrestartbutton {
+	border-radius: 50%;
+	border: 3px solid white;
+	background-color: rgba(0, 0, 0, 1);
+	color: white;
+	font-family: Copse;
+  transition-property: background-color,transform;
+  transition-duration: 500ms;
+}
+
+#startrestartbutton.start {
+	position: absolute;
+	height: 200px;
+	width: 200px;
+	color: white;
+	left: 50%;
+	margin-left: -100px;
+	top: 50%;
+	margin-top: -100px;
+	font-size: 60px;
+	z-index: 2;
+}
+
+#startrestartbutton:hover {
+	background-color: #060ce9;
+	transform: scale(1.1);
+}
+
+.audiobutton{
+  background-color: black;
+	border: 3px solid white;
+	transition-property: background-color,transform;
+  transition-duration: 500ms;
+  font-family: Copse;
+}
+
+.audiobutton:hover{
+  background-color:#28a200;
+	transform: scale(1.1);
+}
+
+.audiobutton.playing:hover{
+  background-color: red;
+	transform: scale(1.1);
+}
+
+div.loading {
+	height: 100px;
+	position: fixed;
+	left: 50%;
+	margin-left: -50px;
+	top: 50%;
+	margin-top: -50px;
+}
+
+img.loading {
+	min-height: 200px;
+	max-height: 200px;
+	height: 100%;
+}
+
+table {
+	/* margin-top: 125px; */
+	margin-bottom: 25px;
+	margin-left: auto;
+	margin-right: auto;
+	border: 5px solid #060ce9;
+	font-family: Copse;
+	background-color: white;
+}
+
+.category-head {
+	font-size: 20px;
+	background-color: #060ce9;
+	color: white;
+  font-weight: bold;
+  transition-duration: 500ms;
+  margin: 2px;
+}
+
+.category-head:hover {
+  color: yellow;
+}
+
+div {
+	width: 125px;
+	height: 125px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	word-break: break-word;
+	font-family: Copse;
+	color: white;
+}
+
+div.clue {
+	background-color: #115ff4;
+	transition: all 500ms;
+	margin: 2px;
+}
+
+div.started {
+	background-color: #8d2ab5;
+}
+
+div.complete {
+	background-color: #28a200;
+}
+
+div.clue:hover {
+	background-color: #1055d4;
+	transform: scale(1.05);
+	margin: 1px;
+}
+
+div.started:hover {
+	background-color: #74119c;
+}
+
+div.complete:hover {
+	background-color: #218300;
+	transform: scale(1);
+}
+
+.clue > img {
+	height: 40px;
+}
+
+.modal {
+	display: none;
+	position: fixed;
+	z-index: 1;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+	font-family: Copse;
+	background-color: rgba(0, 0, 0, 0.85);
+}
+
+.modal-header {
+	color: white;
+	width: 100%;
+	height: 15%;
+}
+
+.question {
+	background-color: #8d2ab5;
+	border-color: #74119c;
+}
+
+.answer {
+	background-color: #28a200;
+	border-color: #1c7000;
+}
+
+.modal-body {
+	width: 100%;
+	vertical-align: middle;
+	height: 85%;
+	background-color: rgba(255, 255, 255, 0.5);
+}
+
+.modal-text {
+	/* font-size: 30px; */
+	margin: 5px;
+}
