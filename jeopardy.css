@@ -14,22 +14,29 @@ body {
 
 @media screen and (max-width: 500px){
 	#jeopardylogo{
-		font-size: 12vw;
+		height: 70px;
+		font-size: 11vw;
 	}
 	table{
 		margin-top: 210px;
 	}
 	#startrestartbutton.restart{
-		position:absolute;
-		top:115px;
-		left:10px;
-		z-index: 0;
+		position:fixed;
+		top:8px;
+		left:3px;
+		z-index: 1;
+		height: 55px;
+		width: 55px;
+		font-size: 15px;
 	}
 	.audiobutton{
-		position:absolute;
-		top:120px;
-		right:15px;
-		z-index: 0;
+		position:fixed;
+		top:8px;
+		right:3px;
+		z-index: 1;
+		height:55px;
+		width:55px;
+		font-size: 13px;
 	}
 	.modal-content {
 		margin-left: 3vw;
@@ -44,6 +51,7 @@ body {
 
 @media screen and (min-width: 500px){
 	#jeopardylogo{
+		height: 100px;
 		font-size: 60px;
 	}
 	table{
@@ -54,12 +62,18 @@ body {
 		top:10px;
 		left:10px;
 		z-index: 1;
+		height: 80px;
+		width: 80px;
+		font-size: large;
 	}
 	.audiobutton{
 		position:fixed;
 		top:15px;
 		right:15px;
 		z-index: 1;
+		height:70px;
+		width:70px;
+		font-size: large;
 	}
 	.modal-content {
 		margin-left: 14vw;
@@ -83,7 +97,6 @@ body {
 
 
 #jeopardylogo {
-	height: 100px;
 	width: 100%;
 	font-family: Copse;
 	color: white;
@@ -118,22 +131,13 @@ body {
 	z-index: 2;
 }
 
-#startrestartbutton.restart {
-	height: 80px;
-	width: 80px;
-  font-size: large;
-}
-
 #startrestartbutton:hover {
 	background-color: #060ce9;
 	transform: scale(1.1);
 }
 
 .audiobutton{
-  height:70px;
-  width:70px;
   background-color: black;
-
 	border: 3px solid white;
 	transition-property: background-color,transform;
   transition-duration: 500ms;
