@@ -1,18 +1,18 @@
 function playJeopardy() {
 	/********************************************************************
---------------------- Settings & Table of Contents ------------------
-********************************************************************/
+	--------------------- Settings & Table of Contents ------------------
+	********************************************************************/
 
 	/** INSTRUCTIONS:
- * - update the CATEGORIES const with an integer to change the number of categories
- * - update the CLUES const with an integer to change the number of clues per category
- * - alternatively, can manipulate [(9-b) Create Start/Restart Button] to create start buttons that make board with different numbers of categories or clues 
- * - if adding additional sounds, be sure to add the audio element to the arrayAudio in [(9-d) Add Sounds to DOM] so that the audio functions properly in [(8-c) playAudio()]
- * 
- *  CUSTOMIZATIONS:
- * - update the SPACEIMAGEURL const with a link to change the image displayed on the game spaces before they are activated
- * - update the SPINNERIMAGEURL const with a link to change the image displayed when the game is loading
- */
+	 * - update the CATEGORIES const with an integer to change the number of categories
+	 * - update the CLUES const with an integer to change the number of clues per category
+	 * - alternatively, can manipulate [(9-b) Create Start/Restart Button] to create start buttons that make board with different numbers of categories or clues 
+	 * - if adding additional sounds, be sure to add the audio element to the arrayAudio in [(9-d) Add Sounds to DOM] so that the audio functions properly in [(8-c) playAudio()]
+	 * 
+	 *  CUSTOMIZATIONS:
+	 * - update the SPACEIMAGEURL const with a link to change the image displayed on the game spaces before they are activated
+	 * - update the SPINNERIMAGEURL const with a link to change the image displayed when the game is loading
+	 */
 
 	const CATEGORIES = 6;
 	const CLUES = 5;
@@ -25,36 +25,36 @@ function playJeopardy() {
 
 	/*___________________________________________________________________
 
-TABLE OF CONTENTS
- 1: getCategoryIds()
- 2: getCategory()
- 3: fillTable()
-	 (3-a) handleClick()
- 4: generateGameBoard()
- 5: setupAndStart()
- 6: showLoadingView()
- 7: hideLoadingView()
- 8: Auxillary Functions
-   (8-a) properFontSize()
-	 (8-b) showModal()
-	 (8-c) playAudio()
-	 (8-d) makeAudioButton()
- 9: When DOM Loads
-	 (9-a) Window Event Listener for Modal Click
-	 (9-b) Create Start/Restart Button
-	 (9-c) Create Game Logo
-	 (9-d) Add Sounds to DOM
-*/
+	TABLE OF CONTENTS
+	1: getCategoryIds()
+	2: getCategory()
+	3: fillTable()
+		(3-a) handleClick()
+	4: generateGameBoard()
+	5: setupAndStart()
+	6: showLoadingView()
+	7: hideLoadingView()
+	8: Auxillary Functions
+		(8-a) properFontSize()
+		(8-b) showModal()
+		(8-c) playAudio()
+		(8-d) makeAudioButton()
+	9: When DOM Loads
+		(9-a) Window Event Listener for Modal Click
+		(9-b) Create Start/Restart Button
+		(9-c) Create Game Logo
+		(9-d) Add Sounds to DOM
+	*/
 
 	/********************************************************************
------------------------ 1: getCategoryIds() -------------------------
-********************************************************************/
+	----------------------- 1: getCategoryIds() -------------------------
+	********************************************************************/
 
 	/** DESCRIPTION:
- * - gets 1000 categories from API
- * - removes categories with fewer clues per category than required (CLUES)
- * - Returns array containing the correct number (CATEGORIES) of random category ids
- */
+	 * - gets 1000 categories from API
+	 * - removes categories with fewer clues per category than required (CLUES)
+	 * - Returns array containing the correct number (CATEGORIES) of random category ids
+	 */
 	async function getCategoryIds(numCategories, numClues) {
 		const arrCategories = [];
 		for (let offset = 0; offset < 10; offset++) {
@@ -69,12 +69,12 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
------------------------- 2: getCategory() ---------------------------
-********************************************************************/
+	------------------------ 2: getCategory() ---------------------------
+	********************************************************************/
 
 	/** DESCRIPTION:
-	* - returns an object with a category title and clue information based on a category ID
-  */
+		* - returns an object with a category title and clue information based on a category ID
+		*/
 	async function getCategory(idCategory) {
 		const res = await axios.get('https://jservice.io/api/category', { params: { id: idCategory } });
 		//creates array of clue objects
@@ -95,17 +95,17 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
---------------------------- 3: fillTable() --------------------------
-********************************************************************/
+	--------------------------- 3: fillTable() --------------------------
+	********************************************************************/
 
 	/** DESCRIPTION:
-	* - create array of category IDs (arrCategoryIds) by passing the number of categories and number of clues per category to the [1: getCategoryIds()] function
-	* - for every id in arrCategoryIds, passes id integer to [2: getCategory()] and receives an object with category information which is put into an array (arrCategoryObjects)
-	* - passes numCategory, numClues, and arrCategoryObjects to [4: generateGameBoard()] to create table elements in DOM
-	* - uses lodash sampling tool to randomize the order of the clues; in the event that there are more clues in the object than required, will take a random set of clues
-	* - hides the load view and adds handleClick event listener to the all .clue divs
-	* - jeopardyGame is referenced by handleClick to provide information to game spaces divs and modals
-	*/
+		* - create array of category IDs (arrCategoryIds) by passing the number of categories and number of clues per category to the [1: getCategoryIds()] function
+		* - for every id in arrCategoryIds, passes id integer to [2: getCategory()] and receives an object with category information which is put into an array (arrCategoryObjects)
+		* - passes numCategory, numClues, and arrCategoryObjects to [4: generateGameBoard()] to create table elements in DOM
+		* - uses lodash sampling tool to randomize the order of the clues; in the event that there are more clues in the object than required, will take a random set of clues
+		* - hides the load view and adds handleClick event listener to the all .clue divs
+		* - jeopardyGame is referenced by handleClick to provide information to game spaces divs and modals
+		*/
 	async function fillTable(numCategory, numClues) {
 		const jeopardyGame = [];
 		const arrCategoryIds = await getCategoryIds(numCategory, numClues);
@@ -133,9 +133,9 @@ TABLE OF CONTENTS
 		// -----> (3-a) HandleClick() <-----
 
 		/** DESCRIPTION:
-	 * - handleClick is part of fillTable() so that jeopardyBoard variable does not have to be global
-	 * - changes the .clue divs and shows question/answer modals
-	 */
+		 * - handleClick is part of fillTable() so that jeopardyBoard variable does not have to be global
+		 * - changes the .clue divs and shows question/answer modals
+		 */
 		function handleClick(evt) {
 			let clickedClue = evt.target;
 			if (evt.target.classList.contains('clueImg')) clickedClue = clickedClue.parentElement;
@@ -168,12 +168,12 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
------------------------ 4: generateGameBoard() ----------------------
-********************************************************************/
+	----------------------- 4: generateGameBoard() ----------------------
+	********************************************************************/
 
 	/**DESCRIPTION:
- * - creates a game board in the DOM based on the number of categories, the number of clues per category, and an array of category objects containing clues
- */
+	 * - creates a game board in the DOM based on the number of categories, the number of clues per category, and an array of category objects containing clues
+	 */
 	function generateGameBoard(numCategory, numClues, arrCategoryObjects) {
 		// create game board
 		const jeopardyTable = document.createElement('table');
@@ -215,17 +215,17 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
--------------------------- 5: setupAndStart() -----------------------
-********************************************************************/
+	-------------------------- 5: setupAndStart() -----------------------
+	********************************************************************/
 
 	/** DESCRIPTION:
- * - activated by "Start!" button at begining and "New Game" button once the game is started
- * -  shows the loading view and hides the start/restart
- * - runs [3: fillTable()] which runs the APIs and builds the game board in the DOM
- * - the loading view is hidden in the [3: fillTable()] function immediately after the game board is loaded into the DOM
- * - plays different sound if the game is loading for the first time or if it is being restarted
- * -removes audio control button before load screen (it is added back by [7: hideLoadingView()]
- */
+	 * - activated by "Start!" button at begining and "New Game" button once the game is started
+	 * -  shows the loading view and hides the start/restart
+	 * - runs [3: fillTable()] which runs the APIs and builds the game board in the DOM
+	 * - the loading view is hidden in the [3: fillTable()] function immediately after the game board is loaded into the DOM
+	 * - plays different sound if the game is loading for the first time or if it is being restarted
+	 * -removes audio control button before load screen (it is added back by [7: hideLoadingView()]
+	 */
 	async function setupAndStart(numCategories, numClues) {
 		$('.audiobutton').remove();
 
@@ -244,14 +244,14 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
-------------------------- 6: showLoadingView() ----------------------
-********************************************************************/
+	------------------------- 6: showLoadingView() ----------------------
+	********************************************************************/
 
 	/** DESCRIPTION:
- * - removes any existing game board from the DOM
- * - hides the start/restart button
- * - creates and dislays the loading view
- */
+	 * - removes any existing game board from the DOM
+	 * - hides the start/restart button
+	 * - creates and dislays the loading view
+	 */
 	function showLoadingView() {
 		document.querySelector('#startrestartbutton').style.visibility = 'hidden';
 
@@ -270,13 +270,13 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
-------------------------- 7: hideLoadingView() ----------------------
-********************************************************************/
+	------------------------- 7: hideLoadingView() ----------------------
+	********************************************************************/
 
 	/** DESCRIPTION:
- * - removes the loading spinner and updates the start/restart button.
- * - add audio button back in
- */
+	 * - removes the loading spinner and updates the start/restart button.
+	 * - add audio button back in
+	 */
 	function hideLoadingView() {
 		const loadingDiv = document.querySelector('div.loading');
 		if (loadingDiv) loadingDiv.remove();
@@ -291,13 +291,13 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
------------------------ 8: Auxillary Functions ----------------------
-********************************************************************/
+	----------------------- 8: Auxillary Functions ----------------------
+	********************************************************************/
 
 	// -----> (8-a) properFontSize() <-----
 	/**DESCRIPTION:
- * - returns the font size that fits best in the the space given the character length of the string.
- */
+	 * - returns the font size that fits best in the the space given the character length of the string.
+	 */
 	function properFontSize(string) {
 		if (string.length > 200) return '8px';
 		if (string.length > 150) return '10px';
@@ -317,26 +317,26 @@ TABLE OF CONTENTS
 	// -----> (8-b) showModal() <-----
 
 	/** DESCRIPTION:
- * - shows a modal when passed content text, a title, and the showing state of the object
- * - REFERENCE: https://www.w3schools.com/howto/howto_css_modals.asp
- */
+	 * - shows a modal when passed content text, a title, and the showing state of the object
+	 * - REFERENCE: https://www.w3schools.com/howto/howto_css_modals.asp
+	 */
 	function showModal(question, answer, showing) {
 		let showTitle, showText;
 		showing === 'none' ? (showTitle = 'Question') : (showTitle = 'Answer');
 		showing === 'none' ? (showText = question) : (showText = answer);
 
 		let modalText = `
-  <div id="jeopardyModalWindow" class="modal">
-    <div id="jeopardyModalContent" class="modal-content ${showTitle.toLowerCase()}">
-      <div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
-        <h2 id="jeopardyModalTitle">${showTitle}</h2>
-      </div>
-      <div id="jeopardyModalBody" class="modal-body">
-        <p id="jeopardyModalText" class="modal-text">${showText}</p>
-      </div>
-    </div>
-  </div>
-  `;
+		<div id="jeopardyModalWindow" class="modal">
+			<div id="jeopardyModalContent" class="modal-content ${showTitle.toLowerCase()}">
+				<div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
+					<h2 id="jeopardyModalTitle">${showTitle}</h2>
+				</div>
+				<div id="jeopardyModalBody" class="modal-body">
+					<p id="jeopardyModalText" class="modal-text">${showText}</p>
+				</div>
+			</div>
+		</div>
+		`;
 		$(`${modalText}`).appendTo(document.body);
 
 		const newModalWindow = document.querySelector('#jeopardyModalWindow');
@@ -346,8 +346,8 @@ TABLE OF CONTENTS
 	// -----> (8-c) playAudio() <-----
 
 	/** DESCRIPTION:
- * - stops other audio, starts audio at beginning, plays audio
- */
+	 * - stops other audio, starts audio at beginning, plays audio
+	 */
 	function playAudio(audioElement) {
 		// pause all sounds loaded into arrayAudio in [9-d: Add Sounds to DOM]
 		for (let sound of arrayAudio) {
@@ -362,10 +362,10 @@ TABLE OF CONTENTS
 	// -----> (8-d) makeAudioButton() <-----
 
 	/** DESCRIPTION:
- * - creates and appends a button that plays and pauses a sound
- * - button text changes based on values passed to function
- * - interacts with [(8-c) playAudio()] to stop other sounds before starting button activated sound from the start
- */
+	 * - creates and appends a button that plays and pauses a sound
+	 * - button text changes based on values passed to function
+	 * - interacts with [(8-c) playAudio()] to stop other sounds before starting button activated sound from the start
+	 */
 	function makeAudioButton(audioElement, playText, pauseText) {
 		const audioBtn = document.createElement('div');
 		audioBtn.classList.add('audiobutton');
@@ -387,15 +387,15 @@ TABLE OF CONTENTS
 	}
 
 	/********************************************************************
-------------------------- 9: When DOM Loads -------------------------
-********************************************************************/
+	------------------------- 9: When DOM Loads -------------------------
+	********************************************************************/
 
 	// -----> (9-a) Window Event Listener for Modal Click <-----
 
 	/** DESCRIPTION:
- * - adds event listener to remove question/answer modal when user clicks anywhere on modal or window
- * - adjusts game space div classes to enable css formatting
- */
+	 * - adds event listener to remove question/answer modal when user clicks anywhere on modal or window
+	 * - adjusts game space div classes to enable css formatting
+	 */
 	window.addEventListener('click', function(e) {
 		const newModalWindow = document.querySelector('#jeopardyModalWindow');
 		const activeDiv = document.querySelector('.active');
@@ -425,9 +425,9 @@ TABLE OF CONTENTS
 	// -----> (9-b) Create Start/Restart Button <-----
 
 	/** DESCRIPTION:
- * - creates the start button and adds it to the document body
- * - button defaults to building a board based on settings at top of script
- */
+	 * - creates the start button and adds it to the document body
+	 * - button defaults to building a board based on settings at top of script
+	 */
 	function createStartRestartButton(numCategories, numClues) {
 		const startRestartBtn = document.createElement('div');
 		startRestartBtn.setAttribute('id', 'startrestartbutton');
@@ -444,8 +444,8 @@ TABLE OF CONTENTS
 	// -----> (9-c) Create Game Logo <-----
 
 	/** DESCRIPTION:
- * - creates the game logo and adds it to the document body
- */
+	 * - creates the game logo and adds it to the document body
+	 */
 	const logoDiv = document.createElement('div');
 	logoDiv.setAttribute('id', 'jeopardylogo');
 	logoDiv.innerText = 'JEOPARDY!';
@@ -454,9 +454,9 @@ TABLE OF CONTENTS
 	// -----> (9-d) Add Sounds to DOM <-----
 
 	/** DESCRIPTION:
- * - appends sounds into the DOM that are used by other funnctions
- * - sounds are added to arrayAudio so that they can be cycled through and systematically paused before playing another sound in  [(8-c) playAudio()]
- */
+	 * - appends sounds into the DOM that are used by other funnctions
+	 * - sounds are added to arrayAudio so that they can be cycled through and systematically paused before playing another sound in  [(8-c) playAudio()]
+	 */
 	const audio_themeSong = document.createElement('audio');
 	audio_themeSong.setAttribute('id', 'themesong');
 	audio_themeSong.src = 'sounds/Jeopardy-theme-song.mp3';
