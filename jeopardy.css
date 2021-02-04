@@ -7,18 +7,78 @@
   #74119c
 */
 
-/* REFERENCE: https://cssgradient.io/ */
 body {
 	margin: 0px;
 	background-color: rgba(0, 0, 0, 0.5);
 }
+
+@media screen and (max-width: 500px){
+	#jeopardylogo{
+		font-size: 12vw;
+	}
+	table{
+		margin-top: 210px;
+	}
+	#startrestartbutton.restart{
+		position:absolute;
+		top:115px;
+		left:10px;
+		z-index: 0;
+	}
+	.audiobutton{
+		position:absolute;
+		top:120px;
+		right:15px;
+		z-index: 0;
+	}
+	.modal-content {
+		margin-left: 3vw;
+		margin-top: 5vh;
+		width: 92vw;
+		height: 85vh;
+	}
+}
+
+@media screen and (min-width: 500px){
+	#jeopardylogo{
+		font-size: 60px;
+	}
+	table{
+		margin-top: 125px;
+	}
+	#startrestartbutton.restart{
+		position:fixed;
+		top:10px;
+		left:10px;
+		z-index: 1;
+	}
+	.audiobutton{
+		position:fixed;
+		top:15px;
+		right:15px;
+		z-index: 1;
+	}
+	.modal-content {
+		margin-left: 14vw;
+		margin-top: 20vh;
+		width: 70vw;
+		height: 60vh;
+	}
+}
+
+.modal-content {
+	position: fixed;
+	display: table-cell;
+	font-size: 2rem;
+	border: 3px solid black;
+}
+
 
 #jeopardylogo {
 	height: 100px;
 	width: 100%;
 	font-family: Copse;
 	color: white;
-	font-size: 80px;
 	border-bottom: 3px solid black;
 	border-top: 3px solid black;
 	background-color: rgba(0, 0, 0, .90);
@@ -35,7 +95,6 @@ body {
 	font-family: Copse;
   transition-property: background-color,transform;
   transition-duration: 500ms;
-	z-index: 2;
 }
 
 #startrestartbutton.start {
@@ -48,14 +107,12 @@ body {
 	top: 50%;
 	margin-top: -100px;
 	font-size: 60px;
+	z-index: 2;
 }
 
 #startrestartbutton.restart {
-	position: fixed;
 	height: 80px;
 	width: 80px;
-	left: 10px;
-	top: 10px;
   font-size: large;
 }
 
@@ -65,14 +122,12 @@ body {
 }
 
 .audiobutton{
-  position:fixed;
   height:70px;
   width:70px;
   background-color: black;
-  z-index: 2;
-  right: 15px;
-  top: 15px;
-  border: 3px solid white;
+
+	border: 3px solid white;
+	transition-property: background-color,transform;
   transition-duration: 500ms;
   font-family: Copse;
 }
@@ -103,7 +158,7 @@ img.loading {
 }
 
 table {
-	margin-top: 125px;
+	/* margin-top: 125px; */
 	margin-bottom: 25px;
 	margin-left: auto;
 	margin-right: auto;
@@ -183,18 +238,6 @@ div.complete:hover {
 	background-color: rgba(0, 0, 0, 0.85);
 }
 
-.modal-content {
-	position: fixed;
-	margin-left: 15%;
-	margin-right: 15%;
-	margin-top: 15%;
-	border: 5px solid black;
-	width: 70%;
-	height: 300px;
-	display: table-cell;
-	font-size: x-large;
-}
-
 .modal-header {
 	color: white;
 	width: 100%;
@@ -219,5 +262,6 @@ div.complete:hover {
 }
 
 .modal-text {
-	font-size: 30px;
+	/* font-size: 30px; */
+	margin: 5px;
 }
