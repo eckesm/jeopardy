@@ -18,7 +18,7 @@ body {
 		font-size: 11vw;
 	}
 	table{
-		margin-top: 210px;
+		margin-top: 125px;
 	}
 	#startrestartbutton.restart{
 		position:fixed;
@@ -39,10 +39,10 @@ body {
 		font-size: 13px;
 	}
 	.modal-content {
-		margin-left: 3vw;
-		margin-top: 5vh;
-		width: 92vw;
-		height: 85vh;
+		margin-left: 6vw;
+		margin-top: 10vh;
+		width: 85vw;
+		height: 75vh;
 	}
 	img.loading {
 		width: 90vw;
@@ -240,7 +240,7 @@ div.complete:hover {
 .modal {
 	display: none;
 	position: fixed;
-	z-index: 1;
+	z-index: 3;
 	left: 0;
 	top: 0;
 	width: 100%;
