@@ -3,10 +3,6 @@
 ## Play Game
 https://eckesm.github.io/jeopardy/
 
-## Branches
-**main**: contains only the html, js, and css files requied to play the Jeopardy game  
-**dev-branch**: also contains testing files jeopardy-test.html and jeopardy-test.js
-
 ## Intructions
 1. Click the "Start!" button to load Jeopardy Game
 2. By default, the game will load with six random categories each with five clues.  The clues are displayed in the category column in a random order.  If the API returns a category with more than five clues, five random clues will be selected.
