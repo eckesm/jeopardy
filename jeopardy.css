@@ -37,6 +37,9 @@ body {
 		width: 92vw;
 		height: 85vh;
 	}
+	img.loading {
+		width: 90vw;
+	}
 }
 
 @media screen and (min-width: 500px){
@@ -63,6 +66,11 @@ body {
 		margin-top: 20vh;
 		width: 70vw;
 		height: 60vh;
+	}
+	img.loading {
+		min-height: 200px;
+		max-height: 200px;
+		height: 100%;
 	}
 }
 
