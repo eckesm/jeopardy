@@ -250,10 +250,36 @@ div.complete:hover {
 	background-color: rgba(0, 0, 0, 0.85);
 }
 
+.close {
+  color: #060ce9;
+  /* float:right; */
+	margin-left: 30px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	border-radius: 10%;
+  font-size: 28px;
+  font-weight: bold;
+	border: 1px solid black;
+	background-color: #115ff4;
+	transition-property: background-color, color;
+	transition-duration: 500ms;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+	background-color:grey;
+  text-decoration: none;
+  cursor: pointer;
+}
+
 .modal-header {
 	color: white;
 	width: 100%;
 	height: 15%;
+
 }
 
 .question {

@@ -328,8 +328,9 @@ function playJeopardy() {
 		let modalText = `
 		<div id="jeopardyModalWindow" class="modal">
 			<div id="jeopardyModalContent" class="modal-content ${showTitle.toLowerCase()}">
-				<div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
-					<h2 id="jeopardyModalTitle">${showTitle}</h2>
+			<div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
+			<h2 id="jeopardyModalTitle">${showTitle}</h2>
+			<span id="modalClose" class="close">&times;</span>
 				</div>
 				<div id="jeopardyModalBody" class="modal-body">
 					<p id="jeopardyModalText" class="modal-text">${showText}</p>
@@ -405,7 +406,9 @@ function playJeopardy() {
 			e.target == document.querySelector('#jeopardyModalHeader') ||
 			e.target == document.querySelector('#jeopardyModalText') ||
 			e.target == document.querySelector('#jeopardyModalTitle') ||
-			e.target == document.querySelector('#jeopardyModalContent')
+			e.target == document.querySelector('#jeopardyModalContent') ||
+			e.target == document.querySelector('#jeopardyModalWindow') ||
+			e.target == document.querySelector('#modalClose')
 		) {
 			// if the space has not been started, add class of "started"
 			// if the space has been started, add class of "complete" and remove "started"
