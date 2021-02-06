@@ -328,9 +328,8 @@ function playJeopardy() {
 		let modalText = `
 		<div id="jeopardyModalWindow" class="modal">
 			<div id="jeopardyModalContent" class="modal-content ${showTitle.toLowerCase()}">
-			<div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
-			<h2 id="jeopardyModalTitle">${showTitle}</h2>
-			<span id="modalClose" class="close">&times;</span>
+				<div id="jeopardyModalHeader" class="modal-header ${showTitle.toLowerCase()}">
+					<h2 id="jeopardyModalTitle">${showTitle}</h2>
 				</div>
 				<div id="jeopardyModalBody" class="modal-body">
 					<p id="jeopardyModalText" class="modal-text">${showText}</p>
@@ -423,6 +422,13 @@ function playJeopardy() {
 			activeDiv.classList.remove('active');
 			newModalWindow.remove();
 		}
+
+		if (e.target.classList.contains('clue') || e.target.classList.contains('clueImg')){
+			console.log('clue')
+		} else {
+			console.log('not clue')
+			if (newModalWindow) newModalWindow.remove()
+		};
 	});
 	//___________________________________________________________________
 	// -----> (9-b) Create Start/Restart Button <-----
